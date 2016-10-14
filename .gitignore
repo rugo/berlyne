@@ -1,0 +1,5 @@
+uptomate/
+.idea/
+*.sqlite3
+*.pyc
+migrations/
