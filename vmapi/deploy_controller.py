@@ -18,6 +18,13 @@ def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=[]):
                 vm_slug,
                 def_file_name) for def_file_name in uptomate.Deployment.DEFAULT_FILE_NAMES
         ]
+
+    if provider is not None:
+        try:
+            provider = uptomate.ALLOWED_PROVIDERS[provider]
+        except KeyError:
+            raise ValueError("Provider {} not known".format(provider))
+
     return uptomate.Deployment.Vagrant(
         vm_slug,
         vagrant_name=vagrant_name,
@@ -26,6 +33,7 @@ def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=[]):
         vagrant_path=settings.VAGR_VAGRANT_PATH,
         file_locs=file_locs
     )
+
 
 def create_deployment(vm_slug, vagrant_name):
     if isinstance(vm_slug, models.VirtualMachine):
@@ -44,10 +52,15 @@ def create_deployment(vm_slug, vagrant_name):
 
     return "Created deployment job", 200
 
-def start_deployment(vm_obj, provider):
-    vagr = _vagr_factory(vm_obj.slug, provider=provider)
+def destroy_deployment(vm):
+    vagr = _vagr_factory(vm.slug)
+    tasks.destroy_deployment.delay(vagr, vm)
+    return "Started fs and db job", 200
+
+def run_on_existing(task, vm_obj,**kwargs):
+    vagr = _vagr_factory(vm_obj.slug, **kwargs)
     if not vagr.exists:
         return "VM with this name does not exist", 404
-    vm_obj.add_task(tasks.start_deployment.delay(vagr))
-    return "Created start job", 200
+    vm_obj.add_task(task.delay(vagr))
+    return "Started task", 200
 
