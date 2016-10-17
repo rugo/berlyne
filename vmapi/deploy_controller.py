@@ -64,3 +64,8 @@ def run_on_existing(task, vm_obj,**kwargs):
     vm_obj.add_task(task.delay(vagr))
     return "Started task", 200
 
+# TODO: make async ?
+# TODO: find method to get provider
+def get_status(vm):
+    vagr = _vagr_factory(vm.slug, provider="docker")
+    return vagr.status().__dict__

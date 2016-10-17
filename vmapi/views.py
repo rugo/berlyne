@@ -27,7 +27,7 @@ def vm_destroy(request, vm_slug):
     )
 
 
-def vm_status(request, vm_slug):
+def vm_tasks(request, vm_slug):
     vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
 
     try:
@@ -37,8 +37,7 @@ def vm_status(request, vm_slug):
 
     return util.http_json_response(
             {
-                'slug': vm_slug,
-                'task_info': task_list
+                'tasks': task_list
             }
     )
 
@@ -46,4 +45,13 @@ def vm_status(request, vm_slug):
 def vm_create(request, vm_slug, vagrant_name):
     return util.http_json_response(
         *deploy_controller.create_deployment(vm_slug, vagrant_name)
+    )
+
+
+def vm_status(request, vm_slug):
+    vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
+    return util.http_json_response(
+        {
+            'status': deploy_controller.get_status(vm)
+        }
     )
