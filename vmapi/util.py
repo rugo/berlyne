@@ -3,6 +3,7 @@ from django.http import HttpResponse
 
 HTTP_OK = 200
 HTTP_SERVER_ERROR = 500
+HTTP_NOT_FOUND = 404
 BASE_TYPES_JSON = (str, int, bool, float)
 
 def http_json_response(msg, status=HTTP_OK):

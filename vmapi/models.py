@@ -12,6 +12,7 @@ class VirtualMachine(models.Model):
     def __str__(self):
         return self.slug
 
+
 # Fucked Up
 class Task(models.Model):
     virtual_machine = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
