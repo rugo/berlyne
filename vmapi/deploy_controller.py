@@ -8,6 +8,7 @@ from . import models
 # TODO: remove
 uptomate.Deployment.TEST_MODE = True
 
+
 def _vagr_factory(vm_slug, vagrant_name, file_locs=[]):
     if not file_locs:
         file_locs = [
@@ -30,9 +31,7 @@ def create_deployment(vm_slug, vagrant_name):
     if vagr.exists:
         return "VM with that name already exists", 419
     # task create
-    vm = models.VirtualMachine(slug=vm_slug)
-    task = tasks.create_deployment.delay(vagr)
-    vm.save()
-    vm.task_set.create(task_meta_id=task.id)
+    vm = models.VirtualMachine.objects.create(slug=vm_slug)
+    vm.add_task(tasks.create_deployment.delay(vagr))
 
     return "Created deployment job", 200
