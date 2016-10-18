@@ -17,6 +17,13 @@ def _task_dict_success(task):
 
 
 def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=None):
+    """
+    Uptomate vagrant factory method
+    :param vm_slug: Slug to be used in the fs
+    :param vagrant_name: File name of Vagrantfile to link to
+    :param provider: Either name of a legit provider or a provider object
+    :param file_locs: Location of the files to copy to deployment folder
+    """
     if file_locs is None:
         file_locs = []
     if not file_locs:
@@ -64,8 +71,7 @@ def create_deployment(vm_slug, vagrant_name):
 
 def destroy_deployment(vm):
     vagr = _vagr_factory(vm.slug)
-    tasks.destroy_deployment.delay(vagr, vm)
-    return "Started fs and db job", 200
+    return _task_dict_success(tasks.destroy_deployment.delay(vagr, vm))
 
 
 def destroy_deployment_db(vm):
@@ -74,9 +80,8 @@ def destroy_deployment_db(vm):
 
 
 def destroy_deployment_fs(vm_slug):
-    _async_res_from_slug(tasks.destroy_vm_fs, vm_slug)
     # No task id since VM DB entry might not exist
-    return "Deleted from fs", 200
+    return _task_dict_success(_async_res_from_slug(tasks.destroy_vm_fs, vm_slug))
 
 
 def _async_res_from_slug(task, vm_slug, **kwargs):
