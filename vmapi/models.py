@@ -1,6 +1,8 @@
 from django.db import models
-from djcelery.models import TaskMeta
 
+# TODO: Align to new best practice (pass the instance)
+from celery import current_app
+from celery.states import READY_STATES, EXCEPTION_STATES
 
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
@@ -16,22 +18,37 @@ class VirtualMachine(models.Model):
 # Fucked Up
 class Task(models.Model):
     virtual_machine = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
-    task_meta = models.ForeignKey(TaskMeta, to_field="task_id")
-    task_name = models.CharField(max_length=200)
+    task_id = models.CharField(max_length=255, unique=True)
     creation_date = models.DateTimeField(auto_now_add=True)
+
 
     # Factory method
     @classmethod
     def create(cls, virtual_machine, async_result):
-        return cls(virtual_machine=virtual_machine, task_meta_id=async_result.id, task_name=async_result.task_name)
+        return cls(virtual_machine=virtual_machine, task_id=async_result.id)
 
-    def to_dict(self):
-        task_meta_dict = self.task_meta.to_dict()
-        task_meta_dict['date_done'] = str(task_meta_dict['date_done'])
-        task_meta_dict['task_name'] = self.task_name
-        task_meta_dict['result'] = str(task_meta_dict['result'])
-        del(task_meta_dict['children'])
-        return task_meta_dict
+    @classmethod
+    def create_and_launch(cls, virtual_machine, task, **task_kwargs):
+        t = task.delay(**task_kwargs)
+        return Task.create(virtual_machine, t)
+
+    def to_dict(self, json_parsable=True):
+        task = current_app.AsyncResult(self.task_id)
+        vm = self.virtual_machine
+        task_dict = {}
+        task_dict['vm'] = str(vm) if json_parsable else vm
+        task_dict['task_name'] = task.task_name
+        task_dict['task_id'] = task.id
+        task_dict['state'] = task.state
+
+        if task.state in READY_STATES:
+            res = task.result
+            task_dict['result'] = str(res) if json_parsable else res
+        if task.state in EXCEPTION_STATES:
+            res = task.traceback
+            task_dict['taceback'] = str(res) if json_parsable else res
+
+        return task_dict
 
     def __str__(self):
-        return self.task_meta_id
+        return "<Task: {}>".format(self.task_id)
