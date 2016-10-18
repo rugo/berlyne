@@ -69,11 +69,12 @@ def vm_status(request, vm_slug):
 
 
 def task_state(request, task_id):
-    task = models.Task.objects.filter(task_id=task_id)
-    if task:
+    try:
+        task = models.Task.objects.get(task_id=task_id)
         res = task.to_dict()
-    else:
+    except ObjectDoesNotExist:
         res = models.Task.get_nondb_task(task_id)
+
     return util.http_json_response(
         res, 200
     )
