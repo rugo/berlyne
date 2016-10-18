@@ -27,6 +27,11 @@ def status_of_deployment(vagr_depl):
 
 
 @shared_task()
+def service_network_address(vagr_depl):
+    return vagr_depl.service_network_address()
+
+
+@shared_task()
 def destroy_vm_fs(vagr_depl):
     vagr_depl.destroy()
     return MSG_SUCCESS

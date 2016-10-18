@@ -20,6 +20,13 @@ def vm_stop(request, vm_slug):
     )
 
 
+def vm_address(request, vm_slug):
+    vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
+    return util.http_json_response(
+        *deploy_controller.run_on_existing(tasks.service_network_address, vm)
+    )
+
+
 def vm_destroy(request, vm_slug):
     vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
     return util.http_json_response(

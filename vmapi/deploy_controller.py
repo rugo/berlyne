@@ -34,9 +34,9 @@ def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=None):
                 def_file_name) for def_file_name in uptomate.Deployment.DEFAULT_FILE_NAMES
         ]
 
-    if provider is not None:
+    if isinstance(provider, str):
         try:
-            provider = uptomate.ALLOWED_PROVIDERS[provider]
+            provider = uptomate.Provider.ALLOWED_PROVIDERS[provider]
         except KeyError:
             raise ValueError("Provider {} not known".format(provider))
 
