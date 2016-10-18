@@ -16,7 +16,9 @@ def _task_dict_success(task):
     }, 200
 
 
-def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=[]):
+def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=None):
+    if file_locs is None:
+        file_locs = []
     if not file_locs:
         file_locs = [
             path.join(
@@ -59,19 +61,23 @@ def create_deployment(vm_slug, vagrant_name):
 
     return _task_dict_success(t)
 
+
 def destroy_deployment(vm):
     vagr = _vagr_factory(vm.slug)
     tasks.destroy_deployment.delay(vagr, vm)
     return "Started fs and db job", 200
 
+
 def destroy_deployment_db(vm):
     tasks.destroy_vm_db(vm)
     return "Deleted from db", 200
 
+
 def destroy_deployment_fs(vm_slug):
-    t = _async_res_from_slug(tasks.destroy_vm_fs, vm_slug)
+    _async_res_from_slug(tasks.destroy_vm_fs, vm_slug)
     # No task id since VM DB entry might not exist
     return "Deleted from fs", 200
+
 
 def _async_res_from_slug(task, vm_slug, **kwargs):
     vagr = _vagr_factory(vm_slug, **kwargs)
@@ -79,7 +85,8 @@ def _async_res_from_slug(task, vm_slug, **kwargs):
         return "VM with this name does not exist", 404
     return task.delay(vagr)
 
-def run_on_existing(task, vm_obj,**kwargs):
-    t = _async_res_from_slug(tasks, vm_obj.slug, kwargs)
+
+def run_on_existing(task, vm_obj, **kwargs):
+    t = _async_res_from_slug(task, vm_obj.slug, **kwargs)
     vm_obj.add_task(t)
     return _task_dict_success(t)

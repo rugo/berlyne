@@ -6,6 +6,7 @@ HTTP_SERVER_ERROR = 500
 HTTP_NOT_FOUND = 404
 BASE_TYPES_JSON = (str, int, bool, float)
 
+
 def http_json_response(msg, status=HTTP_OK):
     if isinstance(msg, str):
         if status != HTTP_OK:

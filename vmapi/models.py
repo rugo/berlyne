@@ -4,6 +4,7 @@ from django.db import models
 from celery import current_app
 from celery.states import READY_STATES, EXCEPTION_STATES
 
+
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -19,27 +20,29 @@ class VirtualMachine(models.Model):
 class Task(models.Model):
     virtual_machine = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=255, unique=True)
+    task_name = models.CharField(max_length=255)
     creation_date = models.DateTimeField(auto_now_add=True)
-
 
     # Factory method
     @classmethod
     def create(cls, virtual_machine, async_result):
-        return cls(virtual_machine=virtual_machine, task_id=async_result.id)
+        return cls(virtual_machine=virtual_machine,
+                   task_id=async_result.id,
+                   task_name=async_result.task_name)
 
     @classmethod
     def create_and_launch(cls, virtual_machine, task, **task_kwargs):
-        t = task.delay(**task_kwargs)
-        return Task.create(virtual_machine, t)
+        return Task.create(virtual_machine, task.delay(**task_kwargs))
 
     def to_dict(self, json_parsable=True):
         task = current_app.AsyncResult(self.task_id)
         vm = self.virtual_machine
-        task_dict = {}
-        task_dict['vm'] = str(vm) if json_parsable else vm
-        task_dict['task_name'] = task.task_name
-        task_dict['task_id'] = task.id
-        task_dict['state'] = task.state
+        task_dict = {
+            'vm': str(vm) if json_parsable else vm,
+            'task_name': self.task_name,
+            'task_id': task.id,
+            'state': task.state
+        }
 
         if task.state in READY_STATES:
             res = task.result

@@ -4,7 +4,6 @@ from . import models
 from . import util
 from . import deploy_controller
 from . import tasks
-from celery import current_app
 
 
 def vm_start(request, vm_slug, provider=None):
@@ -27,16 +26,19 @@ def vm_destroy(request, vm_slug):
         *deploy_controller.destroy_deployment(vm)
     )
 
+
 def vm_destroy_fs(request, vm_slug):
     return util.http_json_response(
         *deploy_controller.destroy_deployment_fs(vm_slug)
     )
+
 
 def vm_destroy_db(request, vm_slug):
     vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
     return util.http_json_response(
         *deploy_controller.destroy_deployment_db(vm)
     )
+
 
 def vm_tasks(request, vm_slug):
     vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)

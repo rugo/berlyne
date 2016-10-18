@@ -20,22 +20,26 @@ def stop_deployment(vagr_depl):
     vagr_depl.stop()
     return MSG_SUCCESS
 
+
 @shared_task()
 def status_of_deployment(vagr_depl):
     return vagr_depl.status().state
+
 
 @shared_task()
 def destroy_vm_fs(vagr_depl):
     vagr_depl.destroy()
     return MSG_SUCCESS
 
+
 @shared_task()
 def destroy_vm_db(vm):
     vm.delete()
     return MSG_SUCCESS
 
+
 @shared_task()
 def destroy_deployment(vagr_depl, vm):
-    destroy_vm_files(vagr_depl)
+    destroy_vm_fs(vagr_depl)
     destroy_vm_db(vm)
     return MSG_SUCCESS

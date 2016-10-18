@@ -15,11 +15,11 @@ urlpatterns = [
             url(r'^destroy_fs$', views.vm_destroy_fs),
         ]
         ),
-    ),
+        ),
     url(r'^task/(?P<task_id>[\w-]+)', include(
         [
             url(r'status$', views.task_state),
         ]
         )
-    )
+        )
 ]
