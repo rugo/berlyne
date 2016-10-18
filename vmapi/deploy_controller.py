@@ -10,6 +10,12 @@ from . import models
 uptomate.Deployment.TEST_MODE = True
 
 
+def _task_dict_success(task):
+    return {
+        'task_id': task.id
+    }, 200
+
+
 def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=[]):
     if not file_locs:
         file_locs = [
@@ -48,24 +54,32 @@ def create_deployment(vm_slug, vagrant_name):
     except IntegrityError:
         return "VM exists already in db", 419
 
-    vm.add_task(tasks.create_deployment.delay(vagr))
+    t = tasks.create_deployment.delay(vagr)
+    vm.add_task(t)
 
-    return "Created deployment job", 200
+    return _task_dict_success(t)
 
 def destroy_deployment(vm):
     vagr = _vagr_factory(vm.slug)
     tasks.destroy_deployment.delay(vagr, vm)
     return "Started fs and db job", 200
 
-def run_on_existing(task, vm_obj,**kwargs):
-    vagr = _vagr_factory(vm_obj.slug, **kwargs)
+def destroy_deployment_db(vm):
+    tasks.destroy_vm_db(vm)
+    return "Deleted from db", 200
+
+def destroy_deployment_fs(vm_slug):
+    t = _async_res_from_slug(tasks.destroy_vm_fs, vm_slug)
+    # No task id since VM DB entry might not exist
+    return "Deleted from fs", 200
+
+def _async_res_from_slug(task, vm_slug, **kwargs):
+    vagr = _vagr_factory(vm_slug, **kwargs)
     if not vagr.exists:
         return "VM with this name does not exist", 404
-    vm_obj.add_task(task.delay(vagr))
-    return "Started task", 200
+    return task.delay(vagr)
 
-# TODO: make async ?
-# TODO: find method to get provider
-def get_status(vm):
-    vagr = _vagr_factory(vm.slug, provider="docker")
-    return vagr.status().__dict__
+def run_on_existing(task, vm_obj,**kwargs):
+    t = _async_res_from_slug(tasks, vm_obj.slug, kwargs)
+    vm_obj.add_task(t)
+    return _task_dict_success(t)
