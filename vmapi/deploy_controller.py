@@ -80,14 +80,11 @@ def destroy_deployment_db(vm):
 
 
 def destroy_deployment_fs(vm_slug):
-    # No task id since VM DB entry might not exist
     return _task_dict_success(_async_res_from_slug(tasks.destroy_vm_fs, vm_slug))
 
 
 def _async_res_from_slug(task, vm_slug, **kwargs):
     vagr = _vagr_factory(vm_slug, **kwargs)
-    if not vagr.exists:
-        return "VM with this name does not exist", 404
     return task.delay(vagr)
 
 
