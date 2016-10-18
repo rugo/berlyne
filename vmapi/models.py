@@ -55,7 +55,7 @@ class Task(models.Model):
         the DB or called destroy_vm_db.
 
         It is not guaranteed that the task with the given task_id
-        exists in case its state returned as PENDING.
+        exists in case its state returned is PENDING.
         :param task_id: Task_id to look for
         :return: Dict with task info
         """
