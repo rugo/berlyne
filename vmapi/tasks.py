@@ -4,8 +4,8 @@ MSG_SUCCESS = "Finished"
 
 
 @shared_task()
-def run_on_vagr(vagr_depl, f):
-    getattr(Deployment.Vagrant, f)(vagr_depl)
+def run_on_vagr(vagr_depl, f, **kwargs):
+    getattr(Deployment.Vagrant, f)(vagr_depl, **kwargs)
     return MSG_SUCCESS
 
 
@@ -27,6 +27,6 @@ def destroy_vm_db(vm):
 
 @shared_task()
 def destroy_deployment(vagr_depl, vm):
-    vagr_depl.destroy()
     destroy_vm_db(vm)
+    vagr_depl.destroy()
     return MSG_SUCCESS
