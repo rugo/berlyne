@@ -6,8 +6,9 @@ from . import uptomate
 from . import tasks
 from . import models
 
-# TODO: remove
-uptomate.Deployment.TEST_MODE = True
+
+if settings.IN_TEST_MODE:
+    uptomate.Deployment.TEST_MODE = True
 
 
 def _task_dict_success(task):

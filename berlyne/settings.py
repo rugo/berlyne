@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -124,6 +125,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Berlyne specific config
+IN_TEST_MODE = 'test' in sys.argv  # hacky
 # This is where we get the configs and provisioning
 # for VMs to create
 DEPLOYMENT_SRC_BASEDIR = '/home/rg/thesis_src/uptomate/testfiles'
@@ -132,7 +134,11 @@ DEPLOYMENT_SRC_BASEDIR = '/home/rg/thesis_src/uptomate/testfiles'
 BROKER_URL = 'django://'
 CELERY_TRACK_STARTED = True
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+TEST_RUNNER = 'djcelery.contrib.test_runner.CeleryTestSuiteRunner'
+if IN_TEST_MODE:
+    CELERY_ALWAYS_EAGER = True
 
 # uptomate
 VAGR_DEPLOYMENT_PATH = '/home/rg/thesis_src/uptomate/deployments/'
 VAGR_VAGRANT_PATH = '/home/rg/thesis_src/uptomate/vagrantfiles/'
+

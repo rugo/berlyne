@@ -5,6 +5,9 @@ from celery import current_app
 from celery.states import READY_STATES, EXCEPTION_STATES
 
 
+DEFAULT_TASK_NAME = "unnamed_task"
+
+
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -34,7 +37,7 @@ class Task(models.Model):
     def create(cls, virtual_machine, async_result):
         return cls(virtual_machine=virtual_machine,
                    task_id=async_result.id,
-                   task_name=async_result.task_name)
+                   task_name=async_result.task_name or DEFAULT_TASK_NAME)
 
     @classmethod
     def create_and_launch(cls, virtual_machine, task, **task_kwargs):
