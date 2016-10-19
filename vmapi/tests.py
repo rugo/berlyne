@@ -37,8 +37,8 @@ def _task_id_from_resp(resp):
 # cookbook/unit-testing.html)
 # for the tests which makes the API useless. For now, the tests just call
 # the view functions. This should be changed in the future with either making
-# celery work with its deamon or moving the tests for the api outside of
-# django.
+# celery work with its deamon (maybe an own Runner with keepdb=True?) or
+# moving the tests for the api outside of django.
 
 class ApiTest(TestCase):
     def setUp(self):
