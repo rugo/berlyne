@@ -6,25 +6,27 @@ from . import deploy_controller
 from . import tasks
 
 
-def vm_start(request, vm_slug, provider=None):
+def _run_task_on_existing_vm(task, vm_slug, **kwargs):
     vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
     return util.http_json_response(
-        *deploy_controller.run_on_existing(tasks.start_deployment, vm, provider=provider)
+        *deploy_controller.run_on_existing(task, vm, **kwargs)
     )
+
+
+def vm_start(request, vm_slug, provider=None):
+    return _run_task_on_existing_vm(tasks.start_deployment, vm_slug, provider=provider)
 
 
 def vm_stop(request, vm_slug):
-    vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
-    return util.http_json_response(
-        *deploy_controller.run_on_existing(tasks.stop_deployment, vm)
-    )
+    return _run_task_on_existing_vm(tasks.stop_deployment, vm_slug)
 
 
 def vm_address(request, vm_slug):
-    vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
-    return util.http_json_response(
-        *deploy_controller.run_on_existing(tasks.service_network_address, vm)
-    )
+    return _run_task_on_existing_vm(tasks.service_network_address, vm_slug)
+
+
+def vm_status(request, vm_slug):
+    return _run_task_on_existing_vm(tasks.status_of_deployment, vm_slug)
 
 
 def vm_destroy(request, vm_slug):
@@ -65,13 +67,6 @@ def vm_tasks(request, vm_slug):
 def vm_create(request, vm_slug, vagrant_name):
     return util.http_json_response(
         *deploy_controller.create_deployment(vm_slug, vagrant_name)
-    )
-
-
-def vm_status(request, vm_slug):
-    vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
-    return util.http_json_response(
-        *deploy_controller.run_on_existing(tasks.status_of_deployment, vm)
     )
 
 
