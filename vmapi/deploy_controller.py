@@ -2,13 +2,24 @@ from django.conf import settings
 from os import path
 from django.db import IntegrityError
 
-from . import uptomate
+from .uptomate.Deployment import Vagrant
+from .uptomate import Deployment, Provider
 from . import tasks
 from . import models
 
 
+LEGAL_API_VM_ACTIONS = [
+    'start',
+    'stop',
+    'status',
+    'address',
+    'resume',
+    'suspend',
+    'reload'
+]
+
 if settings.IN_TEST_MODE:
-    uptomate.Deployment.TEST_MODE = True
+    Deployment.TEST_MODE = True
 
 
 def _task_dict_success(task):
@@ -32,16 +43,16 @@ def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=None):
             path.join(
                 settings.DEPLOYMENT_SRC_BASEDIR,
                 vm_slug,
-                def_file_name) for def_file_name in uptomate.Deployment.DEFAULT_FILE_NAMES
+                def_file_name) for def_file_name in Deployment.DEFAULT_FILE_NAMES
         ]
 
     if isinstance(provider, str):
         try:
-            provider = uptomate.Provider.ALLOWED_PROVIDERS[provider]
+            provider = Provider.ALLOWED_PROVIDERS[provider]
         except KeyError:
             raise ValueError("Provider {} not known".format(provider))
 
-    return uptomate.Deployment.Vagrant(
+    return Vagrant(
         vm_slug,
         vagrant_name=vagrant_name,
         provider=provider,
@@ -64,7 +75,10 @@ def create_deployment(vm_slug, vagrant_name):
     except IntegrityError:
         return "VM exists already in db", 419
 
-    t = tasks.create_deployment.delay(vagr)
+    t = tasks.run_on_vagr.delay(
+        vagr,
+        'create'
+    )
     vm.add_task(t)
 
     return _task_dict_success(t)
@@ -81,15 +95,20 @@ def destroy_deployment_db(vm):
 
 
 def destroy_deployment_fs(vm_slug):
-    return _task_dict_success(_async_res_from_slug(tasks.destroy_vm_fs, vm_slug))
+    return _task_dict_success(_async_res_from_slug(
+        'destroy',
+        vm_slug)
+    )
 
 
-def _async_res_from_slug(task, vm_slug, **kwargs):
+def _async_res_from_slug(action, vm_slug, **kwargs):
     vagr = _vagr_factory(vm_slug, **kwargs)
-    return task.delay(vagr)
+    return tasks.run_on_vagr.delay(vagr, action)
 
 
-def run_on_existing(task, vm_obj, **kwargs):
-    t = _async_res_from_slug(task, vm_obj.slug, **kwargs)
+def run_on_existing(action, vm_obj, **kwargs):
+    if action not in LEGAL_API_VM_ACTIONS:
+        return "Action is not defined", 404
+    t = _async_res_from_slug(action, vm_obj.slug, **kwargs)
     vm_obj.add_task(t)
     return _task_dict_success(t)

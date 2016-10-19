@@ -1,23 +1,11 @@
 from celery import shared_task
-
+from .uptomate import Deployment
 MSG_SUCCESS = "Finished"
 
 
 @shared_task()
-def create_deployment(vagr_depl):
-    vagr_depl.create()
-    return MSG_SUCCESS
-
-
-@shared_task()
-def start_deployment(vagr_depl):
-    vagr_depl.start()
-    return MSG_SUCCESS
-
-
-@shared_task()
-def stop_deployment(vagr_depl):
-    vagr_depl.stop()
+def run_on_vagr(vagr_depl, f):
+    getattr(Deployment.Vagrant, f)(vagr_depl)
     return MSG_SUCCESS
 
 
@@ -32,12 +20,6 @@ def service_network_address(vagr_depl):
 
 
 @shared_task()
-def destroy_vm_fs(vagr_depl):
-    vagr_depl.destroy()
-    return MSG_SUCCESS
-
-
-@shared_task()
 def destroy_vm_db(vm):
     vm.delete()
     return MSG_SUCCESS
@@ -45,6 +27,6 @@ def destroy_vm_db(vm):
 
 @shared_task()
 def destroy_deployment(vagr_depl, vm):
-    destroy_vm_fs(vagr_depl)
+    vagr_depl.destroy()
     destroy_vm_db(vm)
     return MSG_SUCCESS

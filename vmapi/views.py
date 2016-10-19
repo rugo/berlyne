@@ -6,27 +6,19 @@ from . import deploy_controller
 from . import tasks
 
 
-def _run_task_on_existing_vm(task, vm_slug, **kwargs):
+def _run_task_on_existing_vm(action, vm_slug, **kwargs):
     vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
     return util.http_json_response(
-        *deploy_controller.run_on_existing(task, vm, **kwargs)
+        *deploy_controller.run_on_existing(action, vm, **kwargs)
     )
 
 
-def vm_start(request, vm_slug, provider=None):
-    return _run_task_on_existing_vm(tasks.start_deployment, vm_slug, provider=provider)
+def vm_start_provider(request, vm_slug, provider):
+    return _run_task_on_existing_vm('start', vm_slug, provider=provider)
 
 
-def vm_stop(request, vm_slug):
-    return _run_task_on_existing_vm(tasks.stop_deployment, vm_slug)
-
-
-def vm_address(request, vm_slug):
-    return _run_task_on_existing_vm(tasks.service_network_address, vm_slug)
-
-
-def vm_status(request, vm_slug):
-    return _run_task_on_existing_vm(tasks.status_of_deployment, vm_slug)
+def vm_action(request, vm_slug, action_name):
+    return _run_task_on_existing_vm(action_name, vm_slug)
 
 
 def vm_destroy(request, vm_slug):
