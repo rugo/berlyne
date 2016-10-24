@@ -45,9 +45,11 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            {% for page in flatpages %}
+            {% get_flatpages for request.user as user_pages %}
+            {% for page in user_pages %}
                 <li><a href="/pages{{ page.url }}">{{ page.title }}</a></li>
             {% endfor %}
+
           </ul>
         {% if user.is_authenticated %}
             <ul class="nav navbar-nav navbar-right">
