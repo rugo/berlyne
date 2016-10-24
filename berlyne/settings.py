@@ -144,3 +144,9 @@ if IN_TEST_MODE:
 VAGR_DEPLOYMENT_PATH = '/home/rg/thesis_src/uptomate/deployments/'
 VAGR_VAGRANT_PATH = '/home/rg/thesis_src/uptomate/vagrantfiles/'
 
+#email
+# DEFAULT_FROM_EMAIL = "berlyne@ht11.org"
+# EMAIL_HOST = "smtp.adminflex.de"
+# EMAIL_HOST_USER = "xxx"
+# EMAIL_HOST_PASSWORD = "xx"
+
