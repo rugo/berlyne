@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
     'djcelery',
     'kombu.transport.django',
     'vmapi',
@@ -144,6 +146,8 @@ if IN_TEST_MODE:
 VAGR_DEPLOYMENT_PATH = '/home/rg/thesis_src/uptomate/deployments/'
 VAGR_VAGRANT_PATH = '/home/rg/thesis_src/uptomate/vagrantfiles/'
 
+# Flatpages
+SITE_ID = 1
 #email
 # DEFAULT_FROM_EMAIL = "berlyne@ht11.org"
 # EMAIL_HOST = "smtp.adminflex.de"
