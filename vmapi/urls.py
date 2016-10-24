@@ -1,8 +1,6 @@
 from django.conf.urls import url, include
 from . import views
 
-# MAP FUNCTIONS DIRECTLY!
-
 urlpatterns = [
     url(r'^vm/(?P<vm_slug>[\w-]+)/',
         include(

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <legend><span class="col-sm-offset-1">{% trans "Login" %}</span></legend>
+{% if form.errors %}
+            <div class="alert alert-danger">
+                <p>{% trans "Username/Password did not match" %}</p>
+            </div>
+{% endif %}
+
+{% if next %}
+    <div class="alert alert-warning">
+        <p>
+    {% if user.is_authenticated %}
+        {% trans "Your account doesn't have access to this page. To proceed, please login with an account that has access." %}
+    {% else %}
+        {% trans "Please login to see this page." %}
+    {% endif %}
+        </p>
+    </div>
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+
+{% for field in form %}
+    {% include 'registration/form_field.html' %}
+{% endfor %}
+
+<input type="submit" value="login" class="btn btn-default" />
+<input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+<p><a href="{% url 'password_reset' %}" class="btn btn-sm btn-link">Lost password?</a></p>
+{% endblock %}

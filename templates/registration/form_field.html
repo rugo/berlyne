@@ -1,0 +1,20 @@
+{% comment %}
+Taken from:
+https://github.com/ebertti/django-registration-bootstrap/
+(c) Beretti/AmazingWorks
+{% endcomment %}
+{% load css_extra %}
+<div class="form-group {% if field.errors %}has-error{% endif %}">
+    <label for="{{ field.id_for_label }}" class="col-sm-2 control-label">{{ field.label }}</label>
+    <div class="col-sm-10 ">
+    {{ field|add_class:'form-control input-lg' }}
+        {% if field.errors %}
+            <span class='text-danger'>{{ field.errors|join:'<br />' }}</span>
+        {% endif %}
+        {% if field.help_text %}
+            {% autoescape off %}
+            <span class="help-block ">{{ field.help_text }}</span>
+            {% endautoescape %}
+        {% endif %}
+    </div>
+</div>
