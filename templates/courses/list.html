@@ -15,6 +15,7 @@
           <thead>
               <tr>
                   <th>{% trans "Name" %}</th>
+                  <th>{% trans "Participating" %}</th>
                   <th>{% trans "Teacher" %}</th>
                   <th>{% trans "Created" %}</th>
                   <th></th>
@@ -24,6 +25,11 @@
               {% for c in courses %}
                 <tr>
                     <td>{{ c.name }}</td>
+                    {% if c in user_courses %}
+                        <td>&#10003;</td>
+                    {% else %}
+                        <td>&#10060;</td>
+                    {% endif %}
                     <td>{{ c.teacher }}</td>
                     <td>{{ c.creation_time }}</td>
                     <td>

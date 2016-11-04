@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load berlyne_extra %}
+{% load i18n %}
+{% block title %}Enter PW{% endblock %}
+{% block content %}
+    <legend><span class="col-sm-offset-1">{% trans "Join Course" %}</span></legend>
+    {% if msg %}
+        <div class="alert alert-danger" role="alert">{{ msg }}</div>
+    {% endif %}
+    <form method="POST">
+    {% csrf_token %}
+
+    {% for field in form %}
+        {% include 'registration/form_field.html' %}
+    {% endfor %}
+
+    <input type="submit" value="Join" class="btn btn-default" />
+    </form>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.forms import ModelForm
+from django.forms import ModelForm, Form, CharField
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
 from . import models
@@ -22,6 +22,10 @@ class CourseForm(ModelForm):
             'password',
             'point_threshold'
         ]
+
+
+class CoursePwForm(Form):
+    password = CharField(label=_('Password'), max_length=255)
 
 
 MESSAGES = {
@@ -94,7 +98,26 @@ def course_join(request, course_slug):
 @login_required()
 def course_join_pw(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    return None
+    msg = ""
+    if request.POST:
+        form = CoursePwForm(request.POST)
+        if form.is_valid():
+            if course.password == form.cleaned_data['password']:
+                course.participants.add(request.user)
+                return redirect(reverse('wui_courses') + "?m=joined")
+            else:
+                msg = _("Wrong password")
+    else:
+        msg = _("Enter Password")
+
+    return render(
+        request,
+        "courses/join_pw.html",
+        {
+            'msg': msg,
+            'form': CoursePwForm()
+        }
+    )
 
 
 @login_required()
