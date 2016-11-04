@@ -4,6 +4,7 @@ from django.db import models
 from celery import current_app
 from celery.states import READY_STATES, EXCEPTION_STATES
 
+from .uptomate import Deployment
 
 DEFAULT_TASK_NAME = "unnamed_task"
 
@@ -11,6 +12,18 @@ DEFAULT_TASK_NAME = "unnamed_task"
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Stores config of problem running on this machine
+    __vagr_config = None
+
+    def __get_problem_config(self):
+        if not self.__vagr_config:
+            vagr = Deployment.Vagrant(self.slug)
+            self.__vagr_config = vagr.get_config()
+        return self.__vagr_config.copy()
+
+    def get_problem_config(self):
+        return self.__get_problem_config()
 
     def add_task(self, async_result):
         self.task_set.add(Task.create(self, async_result), bulk=False)
@@ -68,7 +81,7 @@ class Task(models.Model):
     def _create_basic_task_dict(task_id, json_parsable=True):
         task = current_app.AsyncResult(task_id)
         task_dict = {
-            'task_name': "unlinked_task",
+            'task_name': DEFAULT_TASK_NAME,
             'task_id': task.id,
             'state': task.state
         }

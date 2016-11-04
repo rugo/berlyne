@@ -1,5 +1,6 @@
 {% load static %}
 {% load i18n %}
+{% load berlyne_extra %}
 {% load flatpages %}
 {% get_flatpages as flatpages %}
 
@@ -53,6 +54,9 @@
           </ul>
         {% if user.is_authenticated %}
             <ul class="nav navbar-nav navbar-right">
+                {% if user|is_in_group:'teachers' %}
+                <li><a href="{% url 'wui_courses' %}">Courses</a></li>
+                {% endif %}
                 <li><a href="{% url 'wui_problems' %}">Problems</a></li>
                 <li><a href="{% url 'wui_scoreboard' %}">Scoreboard</a></li>
                 <li class="dropdown">

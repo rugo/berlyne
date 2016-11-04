@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ headline }}{% endblock %}
+{% block content %}
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">{{ headline }}</div>
+
+      <!-- Table -->
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>{% trans "Name" %}</th>
+                  <th>{% trans "Teacher" %}</th>
+                  <th>{% trans "Created" %}</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for i in courses %}
+                <tr>
+                    <td>{{ i.name }}</td>
+                    <td>{{ i.teacher }}</td>
+                    <td>{{ i.creation_time }}</td>
+                    <td>
+                        <div class="dropdown">
+                          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            Actions
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                            <li><a href="{% url 'wui_course' i.name %}">Edit</a></li>
+                            <li><a href="{% url 'wui_course_tasks' i.name %}">Manage Tasks</a></li>
+                            <li><a href="{% url 'wui_course_delete' i.name %}">Delete</a></li>
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </div>
+{% endblock %}

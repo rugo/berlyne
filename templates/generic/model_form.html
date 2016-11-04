@@ -2,14 +2,14 @@
 {% load i18n %}
 
 {% block content %}
-    <legend><span class="col-sm-offset-1">{% trans "Account Details" %}</span></legend>
+    <legend><span class="col-sm-offset-1">{{ headline }}</span></legend>
 {% if form.errors %}
             <div class="alert alert-danger">
                 <p>{% trans "Invalid data was submitted" %}</p>
             </div>
 {% endif %}
 
-<form method="post" action="{% url 'wui_acc_profile' %}">
+<form method="POST">
 {% csrf_token %}
 
 {% for field in form %}
@@ -19,5 +19,4 @@
 <input type="submit" value="Save" class="btn btn-default" />
 </form>
 
-<p><a href="{% url 'password_change' %}" class="btn btn-sm btn-link">Change password</a></p>
 {% endblock %}

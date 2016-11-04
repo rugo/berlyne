@@ -1,3 +1,57 @@
 from django.db import models
+import vmapi.models
+from django.contrib.auth import models as auth_models
+from django.utils.translation import ugettext_lazy as _
 
-# Create your models here.
+
+class Course(models.Model):
+    name = models.SlugField(_('name'), unique=True)
+    description = models.TextField(_('description'), max_length=1024)
+    creation_time = models.DateTimeField(_('creation date'), auto_now_add=True)
+    # start_time = models.DateTimeField(_('start time'), )
+    # end_time = models.DateTimeField(_('end time'), )
+    show_scoreboard = models.BooleanField(_('show scoreboard'), default=True)
+
+    teacher = models.ForeignKey(auth_models.User,
+                                related_name='teacher_courses')
+    participants = models.ManyToManyField(auth_models.User)
+
+    # Pre shared key needed to join
+    password = models.CharField(_('password'), max_length=255, blank=True, default="")
+
+    # Points needed to pass
+    point_threshold = models.IntegerField(_('point threshold'), )
+
+    # instances of problems (VMs)
+    problems = models.ManyToManyField(vmapi.models.VirtualMachine,
+                                      through='CourseProblems')
+
+    def __str__(self):
+        return "{} ({})".format(
+            self.name,
+            self.teacher.last_name or self.teacher.username
+        )
+
+
+class CourseProblems(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    problem = models.ForeignKey(
+        vmapi.models.VirtualMachine,
+        on_delete=models.CASCADE
+    )
+    points = models.IntegerField()
+
+    def __str__(self):
+        return str(self.problem)
+
+
+class Submission(models.Model):
+    flag = models.CharField(max_length=255)
+    problem = models.ForeignKey(CourseProblems, on_delete=models.CASCADE)
+    creation_time = models.DateTimeField(auto_now_add=True)
+    correct = models.BooleanField()
+    write_up = models.TextField(null=True)
+    user = models.ForeignKey(auth_models.User)
+
+    def __str__(self):
+        return "<{}:{}>".format(self.correct, self.flag)
