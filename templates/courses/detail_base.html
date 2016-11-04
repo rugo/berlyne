@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load berlyne_extra %}
+{% load i18n %}
+{% block title %}{{ course.name }}{% endblock %}
+{% block content %}
+    <ul class="nav nav-tabs">
+        <li role="presentation" {% if page == "course" %} class="active"{% endif %}><a href="#">{% trans "Course" %}</a></li>
+        <li role="presentation" {% if page == "problems" %} class="active"{% endif %}><a href="#">{% trans "Problems" %}</a></li>
+        {% if course.show_scoreboard %}
+            <li role="presentation" {% if page == "scoreboard" %} class="active"{% endif %}><a href="#">{% trans "Scoreboard" %}</a></li>
+        {% endif %}
+    </ul>
+    {% block details %}
+    {% endblock %}
+{% endblock %}

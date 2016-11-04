@@ -24,7 +24,7 @@
           <tbody>
               {% for c in courses %}
                 <tr>
-                    <td>{{ c.name }}</td>
+                    <td><a href="{% url "wui_course_show" c.name %}">{{ c.name }}</a></td>
                     {% if c in user_courses %}
                         <td>&#10003;</td>
                     {% else %}
@@ -40,7 +40,7 @@
                           </button>
                           <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                               {% if user|is_in_group:"teachers" %}
-                                <li><a href="{% url 'wui_course' c.name %}">Edit</a></li>
+                                <li><a href="{% url 'wui_course_edit' c.name %}">Edit</a></li>
                                 <li><a href="{% url 'wui_course_tasks' c.name %}">Manage Tasks</a></li>
                                 <li><a href="{% url 'wui_course_delete' c.name %}">Delete</a></li>
                               {% endif %}

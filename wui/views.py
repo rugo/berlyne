@@ -33,6 +33,7 @@ MESSAGES = {
     'joined': _("You joined the course"),
     'deleted': _("You deleted the course"),
     'left': _("You left the course"),
+    'join_first': _("Join the course first")
 }
 
 @login_required()
@@ -51,6 +52,8 @@ def profile(request):
 def course_edit(request, course_slug=None):
     if request.POST:
         form = CourseForm(request.POST)
+        if course_slug:
+            form.instance = get_object_or_404(models.Course, name=course_slug)
         if form.is_valid():
             form.instance.teacher = request.user
             form.save()
@@ -72,6 +75,21 @@ def courses(request):
         'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
         'user_courses': request.user.course_set.all()
     })
+
+
+@login_required()
+def course_show(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    if not request.user.course_set.filter(name=course.name).exists():
+        return redirect(reverse('wui_courses') + "?m=join_first")
+
+    return render(
+        request, "courses/detail_course.html",
+        {
+            'course': course,
+            'page': 'course'
+        }
+    )
 
 
 @permission_required('can_manage_course')
