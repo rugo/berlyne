@@ -6,6 +6,7 @@ from . import models
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 
+
 class UserForm(ModelForm):
     class Meta:
         model = User
@@ -36,6 +37,7 @@ MESSAGES = {
     'join_first': _("Join the course first")
 }
 
+
 @login_required()
 def profile(request):
     if request.POST:
@@ -48,6 +50,7 @@ def profile(request):
     return render(request, 'accounts/profile.html', {'form': form})
 
 
+# TODO: split course_edit
 @permission_required('can_manage_course')
 def course_edit(request, course_slug=None):
     if request.POST:
@@ -67,6 +70,7 @@ def course_edit(request, course_slug=None):
     return render(request, 'generic/model_form.html', {'headline': _('Course'),
                                                        'form': form})
 
+
 @login_required()
 def courses(request):
     return render(request, 'courses/list.html', {
@@ -80,7 +84,7 @@ def courses(request):
 @login_required()
 def course_show(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    if not request.user.course_set.filter(name=course.name).exists():
+    if not models.Course.has_user(request.user):
         return redirect(reverse('wui_courses') + "?m=join_first")
 
     return render(
@@ -157,7 +161,6 @@ def problems(request):
 
 def course_tasks(request):
     return None
-
 
 
 def index(request):

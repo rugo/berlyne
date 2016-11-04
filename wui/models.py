@@ -32,6 +32,12 @@ class Course(models.Model):
             self.teacher.last_name or self.teacher.username
         )
 
+    def has_user(self, user):
+        if not isinstance(user, str):
+            user = user.username
+
+        return self.participants.filter(username=user).exists()
+
 
 class CourseProblems(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -46,11 +52,11 @@ class CourseProblems(models.Model):
 
 
 class Submission(models.Model):
-    flag = models.CharField(max_length=255)
+    flag = models.CharField(_('flag'), max_length=255)
     problem = models.ForeignKey(CourseProblems, on_delete=models.CASCADE)
     creation_time = models.DateTimeField(auto_now_add=True)
-    correct = models.BooleanField()
-    write_up = models.TextField(null=True)
+    correct = models.BooleanField(_('correct'))
+    write_up = models.TextField(_('write up'), null=True)
     user = models.ForeignKey(auth_models.User)
 
     def __str__(self):
