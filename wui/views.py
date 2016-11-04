@@ -24,6 +24,13 @@ class CourseForm(ModelForm):
         ]
 
 
+MESSAGES = {
+    '': None,
+    'joined': _("You joined the course"),
+    'deleted': _("You deleted the course"),
+    'left': _("You left the course"),
+}
+
 @login_required()
 def profile(request):
     if request.POST:
@@ -53,11 +60,13 @@ def course_edit(request, course_slug=None):
     return render(request, 'generic/model_form.html', {'headline': _('Course'),
                                                        'form': form})
 
-@permission_required('can_manage_course')
+@login_required()
 def courses(request):
     return render(request, 'courses/list.html', {
         'headline': _('Courses'),
         'courses': models.Course.objects.all(),
+        'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
+        'user_courses': request.user.course_set.all()
     })
 
 
@@ -65,7 +74,35 @@ def courses(request):
 def course_delete(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
     course.delete()
-    return redirect(reverse('wui_courses'))
+    return redirect(reverse('wui_courses') + "?m=deleted")
+
+
+@login_required()
+def course_join(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    if course.password:
+        return redirect(
+            reverse(
+                'wui_course_join_pw',
+                kwargs={'course_slug': course_slug}
+            )
+        )
+    course.participants.add(request.user)
+    return redirect(reverse('wui_courses') + "?m=joined")
+
+
+@login_required()
+def course_join_pw(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    return None
+
+
+@login_required()
+def course_leave(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    course.participants.remove(request.user)
+    return redirect(reverse('wui_courses') + "?m=left")
+
 
 @login_required()
 def scoreboard(request):

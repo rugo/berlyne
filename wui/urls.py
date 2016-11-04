@@ -17,4 +17,7 @@ urlpatterns = [
     url(r'^course/(?P<course_slug>[\w-]+)$', views.course_edit, name='wui_course'),
     url(r'^course/(?P<course_slug>[\w-]+)/tasks/$', views.course_tasks, name='wui_course_tasks'),
     url(r'^course/(?P<course_slug>[\w-]+)/delete/$', views.course_delete, name='wui_course_delete'),
+    url(r'^course/(?P<course_slug>[\w-]+)/join/$', views.course_join, name='wui_course_join'),
+    url(r'^course/(?P<course_slug>[\w-]+)/join_pw/$', views.course_join_pw, name='wui_course_join_pw'),
+    url(r'^course/(?P<course_slug>[\w-]+)/leave/$', views.course_leave, name='wui_course_leave'),
 ]

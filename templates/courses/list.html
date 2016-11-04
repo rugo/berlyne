@@ -1,7 +1,11 @@
 {% extends "base.html" %}
+{% load berlyne_extra %}
 {% load i18n %}
 {% block title %}{{ headline }}{% endblock %}
 {% block content %}
+    {% if message %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+    {% endif %}
     <div class="panel panel-default">
       <!-- Default panel contents -->
       <div class="panel-heading">{{ headline }}</div>
@@ -17,11 +21,11 @@
               </tr>
           </thead>
           <tbody>
-              {% for i in courses %}
+              {% for c in courses %}
                 <tr>
-                    <td>{{ i.name }}</td>
-                    <td>{{ i.teacher }}</td>
-                    <td>{{ i.creation_time }}</td>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.teacher }}</td>
+                    <td>{{ c.creation_time }}</td>
                     <td>
                         <div class="dropdown">
                           <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -29,9 +33,16 @@
                             <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                            <li><a href="{% url 'wui_course' i.name %}">Edit</a></li>
-                            <li><a href="{% url 'wui_course_tasks' i.name %}">Manage Tasks</a></li>
-                            <li><a href="{% url 'wui_course_delete' i.name %}">Delete</a></li>
+                              {% if user|is_in_group:"teachers" %}
+                                <li><a href="{% url 'wui_course' c.name %}">Edit</a></li>
+                                <li><a href="{% url 'wui_course_tasks' c.name %}">Manage Tasks</a></li>
+                                <li><a href="{% url 'wui_course_delete' c.name %}">Delete</a></li>
+                              {% endif %}
+                              {% if c in user_courses %}
+                                  <li><a href="{% url 'wui_course_leave' c.name %}">Leave</a></li>
+                              {% else %}
+                                  <li><a href="{% url 'wui_course_join' c.name %}">Join</a></li>
+                              {% endif %}
                           </ul>
                         </div>
                     </td>
