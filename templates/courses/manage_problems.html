@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load berlyne_extra %}
+{% load i18n %}
+{% block title %}Manage Problems{% endblock %}
+{% block content %}
+    <legend><span class="col-sm-offset-1">{% trans "Assign problems to course" %}</span></legend>
+    <form method="POST">
+        {% csrf_token %}
+
+        {% for field in form %}
+            {% include 'registration/form_field.html' %}
+        {% endfor %}
+
+        <input type="submit" value="{% trans "Save" %}" class="btn btn-default" />
+    </form>
+{% endblock %}

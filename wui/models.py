@@ -47,6 +47,21 @@ class CourseProblems(models.Model):
     )
     points = models.IntegerField()
 
+    class Meta:
+        unique_together = ('course', 'problem')
+
+    @classmethod
+    def create_or_update(cls, course, problem, points=0):
+        cp = cls.objects.filter(course=course, problem=problem).first()
+        if not cp:
+            cp = cls(course=course, problem=problem, points=points)
+        cp.points = points
+        cp.save()
+
+    @staticmethod
+    def drop_for_course(course):
+        CourseProblems.objects.all().delete()
+
     def __str__(self):
         return str(self.problem)
 

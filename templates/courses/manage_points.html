@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load berlyne_extra %}
+{% load i18n %}
+{% block title %}Manage Points{% endblock %}
+{% block content %}
+    <legend><span class="col-sm-offset-1">{% trans "Define Points per Problem" %}</span></legend>
+    <form method="POST">
+        {% csrf_token %}
+
+        {% for f in cp_forms %}
+            <div class="form-group {% if f.errors %}has-error{% endif %}">
+                <label class="col-sm-2 control-label">{{ f.prefix }}</label>
+                {% for field in f %}
+                    <div class="col-sm-10 ">
+                    {{ field|add_class:'form-control input-lg' }}
+                        {% if field.errors %}
+                            <span class='text-danger'>{{ field.errors|join:'<br />' }}</span>
+                        {% endif %}
+                        {% if field.help_text %}
+                            {% autoescape off %}
+                            <span class="help-block ">{{ field.help_text }}</span>
+                            {% endautoescape %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <input type="submit" value="{% trans "Save" %}" class="btn btn-default" />
+    </form>
+{% endblock %}

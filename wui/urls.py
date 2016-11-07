@@ -23,6 +23,8 @@ urlpatterns = [
             url(r'^leave/$', views.course_leave, name='wui_course_leave'),
             url(r'^problems/$', views.course_problems, name='wui_course_problems'),
             url(r'^scoreboard/$', views.course_scoreboard, name='wui_course_scoreboard'),
+            url(r'^manage_problems/$', views.course_manage_problems, name='wui_course_manage_problems'),
+            url(r'^manage_points/$', views.course_manage_points, name='wui_points_to_problems')
         ]
     )),
 ]

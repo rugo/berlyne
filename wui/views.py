@@ -1,33 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.forms import ModelForm, Form, CharField
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
 from . import models
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
-
-
-class UserForm(ModelForm):
-    class Meta:
-        model = User
-        fields = ['email', 'first_name', 'last_name']
-
-
-class CourseForm(ModelForm):
-    class Meta:
-        model = models.Course
-        fields = [
-            'name',
-            'description',
-            'show_scoreboard',
-            'password',
-            'point_threshold'
-        ]
-
-
-class CoursePwForm(Form):
-    password = CharField(label=_('Password'), max_length=255)
-
+from .forms import *
 
 MESSAGES = {
     '': None,
@@ -60,6 +36,11 @@ def course_edit(request, course_slug=None):
         if form.is_valid():
             form.instance.teacher = request.user
             form.save()
+        if not course_slug:
+            return redirect(
+                reverse('wui_course_manage_problems',
+                        kwargs={'course_slug': form.cleaned_data['name']})
+            )
     else:
         if course_slug:
             form = CourseForm(
@@ -163,6 +144,59 @@ def course_problems(request, course_slug):
 @login_required()
 def user_problems(request):
     return None
+
+
+@permission_required('can_manage_course')
+def course_manage_problems(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    if request.POST:
+        form = AddProbForm(request.POST, instance=course)
+        if form.is_valid():
+            models.CourseProblems.drop_for_course(course)
+            for problem in form.cleaned_data['problems']:
+                models.CourseProblems.create_or_update(course, problem)
+            return redirect(reverse('wui_points_to_problems',
+                                    kwargs={'course_slug': course_slug}))
+
+    return render(
+        request,
+        "courses/manage_problems.html",
+        {
+            "course_name": course.name,
+            "form": AddProbForm(instance=course)
+        }
+    )
+
+
+@permission_required('can_manage_course')
+def course_manage_points(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    problems = course.problems.all()
+    cp_forms = []
+
+    if request.POST:
+        for prob in problems:
+            form = PointToProbForm(request.POST, prefix=prob.slug)
+            cp_forms.append(form)
+            if form.is_valid():
+                models.CourseProblems.create_or_update(
+                    course,
+                    prob,
+                    form.cleaned_data['points']
+                )
+            else:
+                break
+        else:
+            return redirect(reverse('wui_courses'))
+    else:
+        for cp in problems:
+            cp_forms.append(PointToProbForm(prefix=cp.slug))
+
+    return render(
+        request,
+        "courses/manage_points.html",
+        {'cp_forms': cp_forms}
+    )
 
 
 def index(request):
