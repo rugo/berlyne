@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from . import models
+from django.apps import apps
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
 import logging
@@ -31,11 +32,8 @@ def __setup_frontpage():
     fp.sites.add(s)
 
 
-# TODO: Change to specific sender
-@receiver(post_migrate)
+@receiver(post_migrate, sender=apps.get_app_config('wui'))
 def init_groups(sender, **kwargs):
-    if sender.name != 'wui':
-        return
     logger.info("Running post_migrate routine for 'wui'")
     __setup_create_groups()
     __setup_frontpage()
