@@ -41,7 +41,7 @@
                           <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                               {% if user|is_in_group:"teachers" %}
                                 <li><a href="{% url 'wui_course_edit' c.name %}">Edit</a></li>
-                                <li><a href="{% url 'wui_course_tasks' c.name %}">Manage Tasks</a></li>
+                                <li><a href="{% url 'wui_course_problems' c.name %}">Manage Tasks</a></li>
                                 <li><a href="{% url 'wui_course_delete' c.name %}">Delete</a></li>
                               {% endif %}
                               {% if c in user_courses %}
@@ -57,4 +57,7 @@
           </tbody>
       </table>
     </div>
+    {% if user|is_in_group:"teachers" %}
+        <a href="{% url 'wui_course_create' %}" class="btn btn-default">Create Course</a>
+    {% endif %}
 {% endblock %}

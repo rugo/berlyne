@@ -71,6 +71,7 @@ def course_edit(request, course_slug=None):
                                                        'form': form})
 
 
+# TODO: make in one query
 @login_required()
 def courses(request):
     return render(request, 'courses/list.html', {
@@ -84,7 +85,7 @@ def courses(request):
 @login_required()
 def course_show(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    if not models.Course.has_user(request.user):
+    if not course.has_user(request.user):
         return redirect(reverse('wui_courses') + "?m=join_first")
 
     return render(
@@ -150,16 +151,17 @@ def course_leave(request, course_slug):
 
 
 @login_required()
-def scoreboard(request):
+def course_scoreboard(request, course_slug):
     return None
 
 
 @login_required()
-def problems(request):
+def course_problems(request, course_slug):
     return None
 
 
-def course_tasks(request):
+@login_required()
+def user_problems(request):
     return None
 
 
