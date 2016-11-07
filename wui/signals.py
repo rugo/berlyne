@@ -19,8 +19,6 @@ def __setup_create_groups():
     if created:
         group.permissions.add(perm)
 
-    group, _ = Group.objects.get_or_create(name='students')
-
 
 def __setup_frontpage():
     fp, _ = FlatPage.objects.get_or_create(url="/",
