@@ -3,6 +3,7 @@ from django.forms import (
     Form,
     CharField,
     IntegerField,
+    HiddenInput
 )
 
 from django.contrib.auth.models import User
@@ -40,3 +41,8 @@ class AddProbForm(ModelForm):
 
 class PointToProbForm(Form):
     points = IntegerField()
+
+
+class SubmissionForm(Form):
+    problem_slug = CharField(widget=HiddenInput)
+    flag = CharField(max_length=255)

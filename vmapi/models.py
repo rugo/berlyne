@@ -13,7 +13,11 @@ class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     ip_addr = models.CharField(max_length=45)
+
+    # Attrs used from config
     desc = models.TextField(max_length=1024)
+    category = models.CharField(max_length=255)
+    flag = models.CharField(max_length=255)
 
     # Stores config of problem running on this machine
     __vagr_config = None

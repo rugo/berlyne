@@ -1,0 +1,25 @@
+{% load i18n %}
+{% for category, problems in categories.items %}
+    <h3>{{ category }}</h3>
+    {% for problem in problems %}
+         <div class="panel-group">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse{{ problem.title }}">{{ problem.title }} [{{ problem.points }} {% trans "points" %}]</a>
+              </h4>
+            </div>
+            <div id="collapse{{ problem.title }}" class="panel-collapse {% if open_title != problem.title %}collapse{% endif %}">
+              <div class="panel-body">{% autoescape off %}{{ problem.desc }}{% endautoescape %}</div>
+              <div class="panel-footer">
+                  <form method="POST" action="?title={{ problem.title }}">
+                      {% csrf_token %}
+                      {{ problem.form }}
+                      <input type="submit" class="btn btn-primary" value="{% trans 'Submit' %}">
+                  </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+{% endfor %}

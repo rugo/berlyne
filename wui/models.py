@@ -62,6 +62,15 @@ class CourseProblems(models.Model):
     def drop_for_course(course):
         CourseProblems.objects.all().delete()
 
+    @staticmethod
+    def check_problem_flag(course, problem_slug, flag):
+        cp = CourseProblems.objects.get(
+            course=course,
+            problem=vmapi.models.VirtualMachine.objects.get(slug=problem_slug)
+        )
+        correct = cp.problem.flag == flag
+        return correct, cp
+
     def __str__(self):
         return str(self.problem)
 

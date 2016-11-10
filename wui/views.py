@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from . import models
+from vmapi import models as api_models
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
@@ -131,13 +132,80 @@ def course_leave(request, course_slug):
     return redirect(reverse('wui_courses') + "?m=left")
 
 
-@login_required()
-def course_scoreboard(request, course_slug):
-    return None
+def _course_problem_dict(course):
+    categories = {}
+    total_points = 0
+    for problem in course.problems.all():
+        category = problem.category.capitalize()
+        problems = categories.get(category, [])
 
+        course_prob = models.CourseProblems.objects.get(
+            problem=problem,
+            course=course
+        )
+
+        problems.append({
+            'title': problem.slug,
+            'points': course_prob.points,
+            'desc': problem.desc,
+            'form': SubmissionForm(initial={'problem_slug': problem.slug})
+        })
+
+        total_points += course_prob.points
+        # In case new list was created
+        categories[category] = problems
+    return categories, total_points
 
 @login_required()
 def course_problems(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    open_title = request.GET.get('title', '')
+    errors = []
+    success = []
+    if not course.has_user(request.user):
+        return redirect(reverse('wui_courses') + "?m=join_first")
+
+    if request.POST:
+        form = SubmissionForm(request.POST)
+        if form.is_valid():
+            flag_correct, course_problem = models.CourseProblems.check_problem_flag(
+                course,
+                form.cleaned_data['problem_slug'],
+                form.cleaned_data['flag']
+            )
+            models.Submission.objects.create(
+                flag=form.cleaned_data['flag'],
+                problem=course_problem,
+                correct=flag_correct,
+                user=request.user
+            )
+            if flag_correct:
+                success.append(_("Flag was correct!"))
+            else:
+                errors.append(_("Flag was incorrect!"))
+        else:
+            errors.append(_("Form was invalid"))
+
+    categories, total_points = _course_problem_dict(course)
+
+    return render(
+        request,
+        "courses/course_problems.html",
+        {
+            'categories': categories,
+            'total_points': total_points,
+            'page': 'problems',
+            'course': course,
+            'open_title': open_title,
+            'errors': errors,
+            'success': success
+        }
+    )
+
+
+
+@login_required()
+def course_scoreboard(request, course_slug):
     return None
 
 
