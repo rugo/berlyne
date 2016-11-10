@@ -2,6 +2,6 @@
 {% load i18n %}
 {% block details %}
     <h1>{% trans 'Problems' %}</h1>
-    <h4>{% trans 'Total Points' %}: {{ total_points }}</h4>
+    <h4>{% trans 'Your points' %}: {{ user_points }} of {{ total_points }}</h4>
     {% include 'courses/problem_list.html' %}
 {% endblock %}

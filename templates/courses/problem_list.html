@@ -1,6 +1,9 @@
 {% load i18n %}
+
 {% for category, problems in categories.items %}
-    <h3>{{ category }}</h3>
+    <div class="content-left">
+        <h3>{{ category }}</h3>
+    </div>
     {% for problem in problems %}
          <div class="panel-group">
           <div class="panel panel-default">
@@ -12,11 +15,15 @@
             <div id="collapse{{ problem.title }}" class="panel-collapse {% if open_title != problem.title %}collapse{% endif %}">
               <div class="panel-body">{% autoescape off %}{{ problem.desc }}{% endautoescape %}</div>
               <div class="panel-footer">
-                  <form method="POST" action="?title={{ problem.title }}">
-                      {% csrf_token %}
-                      {{ problem.form }}
-                      <input type="submit" class="btn btn-primary" value="{% trans 'Submit' %}">
-                  </form>
+                  {% if problem.solved %}
+                    {% trans "Solved!" %}
+                  {% else %}
+                      <form method="POST" action="?title={{ problem.title }}">
+                          {% csrf_token %}
+                          {{ problem.form }}
+                          <input type="submit" class="btn btn-primary" value="{% trans 'Submit' %}">
+                      </form>
+                  {% endif %}
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ from vmapi import models as api_models
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
+from django.core.exceptions import ValidationError
 
 MESSAGES = {
     '': None,
@@ -58,9 +59,9 @@ def course_edit(request, course_slug=None):
 def courses(request):
     return render(request, 'courses/list.html', {
         'headline': _('Courses'),
-        'courses': models.Course.objects.all(),
+        'courses': models.Course.objects.all().exclude(),
         'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
-        'user_courses': request.user.course_set.all()
+        'user_courses': request.user.course_set.all().v
     })
 
 
@@ -132,29 +133,31 @@ def course_leave(request, course_slug):
     return redirect(reverse('wui_courses') + "?m=left")
 
 
-def _course_problem_dict(course):
+def _course_problem_dict(course, user):
     categories = {}
     total_points = 0
-    for problem in course.problems.all():
-        category = problem.category.capitalize()
+    for course_prob in models.CourseProblems.objects.filter(course=course):
+        category = course_prob.problem.category.capitalize()
         problems = categories.get(category, [])
 
-        course_prob = models.CourseProblems.objects.get(
-            problem=problem,
-            course=course
-        )
-
         problems.append({
-            'title': problem.slug,
+            'title': course_prob.problem.slug,
             'points': course_prob.points,
-            'desc': problem.desc,
-            'form': SubmissionForm(initial={'problem_slug': problem.slug})
+            'desc': course_prob.problem.desc,
+            'form': SubmissionForm(initial={
+                'problem_slug': course_prob.problem.slug}
+            ),
+            'solved': course_prob.submission_set.filter(
+                user=user,
+                correct=True,
+            ).exists()
         })
 
         total_points += course_prob.points
         # In case new list was created
         categories[category] = problems
     return categories, total_points
+
 
 @login_required()
 def course_problems(request, course_slug):
@@ -173,12 +176,16 @@ def course_problems(request, course_slug):
                 form.cleaned_data['problem_slug'],
                 form.cleaned_data['flag']
             )
-            models.Submission.objects.create(
-                flag=form.cleaned_data['flag'],
-                problem=course_problem,
-                correct=flag_correct,
-                user=request.user
-            )
+            try:
+                models.Submission.objects.create(
+                    flag=form.cleaned_data['flag'],
+                    problem=course_problem,
+                    correct=flag_correct,
+                    user=request.user
+                )
+            except ValidationError:
+                errors.append(_("You already tried that..."))
+
             if flag_correct:
                 success.append(_("Flag was correct!"))
             else:
@@ -186,7 +193,16 @@ def course_problems(request, course_slug):
         else:
             errors.append(_("Form was invalid"))
 
-    categories, total_points = _course_problem_dict(course)
+    categories, total_points = _course_problem_dict(course, request.user)
+    user_points = sum(
+        [
+            sub.problem.points for sub in models.Submission.objects.filter(
+                user=request.user,
+                correct=True,
+                problem__course=course
+            )
+        ]
+    )
 
     return render(
         request,
@@ -194,6 +210,7 @@ def course_problems(request, course_slug):
         {
             'categories': categories,
             'total_points': total_points,
+            'user_points': user_points,
             'page': 'problems',
             'course': course,
             'open_title': open_title,
@@ -201,7 +218,6 @@ def course_problems(request, course_slug):
             'success': success
         }
     )
-
 
 
 @login_required()

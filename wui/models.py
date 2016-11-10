@@ -66,7 +66,7 @@ class CourseProblems(models.Model):
     def check_problem_flag(course, problem_slug, flag):
         cp = CourseProblems.objects.get(
             course=course,
-            problem=vmapi.models.VirtualMachine.objects.get(slug=problem_slug)
+            problem__slug=problem_slug
         )
         correct = cp.problem.flag == flag
         return correct, cp
@@ -82,6 +82,9 @@ class Submission(models.Model):
     correct = models.BooleanField(_('correct'))
     write_up = models.TextField(_('write up'), null=True)
     user = models.ForeignKey(auth_models.User)
+
+    class Meta:
+        unique_together = ('flag', 'correct', 'user', 'problem')
 
     def __str__(self):
         return "<{}:{}>".format(self.correct, self.flag)

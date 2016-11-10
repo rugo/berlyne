@@ -9,3 +9,6 @@ body {
 th {
   text-align: center;
 }
+.content-left {
+  text-align: left;
+}
