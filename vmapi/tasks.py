@@ -4,8 +4,10 @@ MSG_SUCCESS = "Finished"
 
 
 @shared_task()
-def run_on_vagr(vagr_depl, f, **kwargs):
+def run_on_vagr(vagr_depl, f, vm_db=None, **kwargs):
     getattr(Deployment.Vagrant, f)(vagr_depl, **kwargs)
+    if vm_db is not None:
+        vm_db.ip_addr = vagr_depl.service_network_address()
     return MSG_SUCCESS
 
 

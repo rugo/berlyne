@@ -101,14 +101,14 @@ def destroy_deployment_fs(vm_slug):
     )
 
 
-def _async_res_from_slug(action, vm_slug, **kwargs):
+def _async_res_from_slug(action, vm_slug, vm_db=None, **kwargs):
     vagr = _vagr_factory(vm_slug, **kwargs)
-    return tasks.run_on_vagr.delay(vagr, action)
+    return tasks.run_on_vagr.delay(vagr, action, vm_db)
 
 
 def run_on_existing(action, vm_obj, **kwargs):
     if action not in LEGAL_API_VM_ACTIONS:
         return "Action is not defined", 404
-    t = _async_res_from_slug(action, vm_obj.slug, **kwargs)
+    t = _async_res_from_slug(action, vm_obj.slug, vm_obj, **kwargs)
     vm_obj.add_task(t)
     return _task_dict_success(t)

@@ -12,6 +12,8 @@ DEFAULT_TASK_NAME = "unnamed_task"
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    ip_addr = models.CharField(max_length=45)
+    desc = models.TextField(max_length=1024)
 
     # Stores config of problem running on this machine
     __vagr_config = None
@@ -30,6 +32,11 @@ class VirtualMachine(models.Model):
 
     def __str__(self):
         return self.slug
+
+
+class Port(models.Model):
+    number = models.IntegerField(primary_key=True)
+    vm = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
 
 
 class Task(models.Model):
