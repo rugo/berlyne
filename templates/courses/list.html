@@ -30,7 +30,7 @@
                     {% else %}
                         <td>&#10060;</td>
                     {% endif %}
-                    <td>{{ c.teacher }}</td>
+                    <td>{% if c.teacher.last_name %}{{ c.teacher.last_name }}{% else %}{{ c.teacher }}{% endif %}</td>
                     <td>{{ c.creation_time }}</td>
                     <td>
                         <div class="dropdown">
