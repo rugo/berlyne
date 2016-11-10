@@ -59,10 +59,6 @@ class CourseProblems(models.Model):
         cp.save()
 
     @staticmethod
-    def drop_for_course(course):
-        CourseProblems.objects.all().delete()
-
-    @staticmethod
     def check_problem_flag(course, problem_slug, flag):
         cp = CourseProblems.objects.get(
             course=course,
