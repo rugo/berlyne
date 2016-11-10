@@ -61,7 +61,7 @@ def courses(request):
         'headline': _('Courses'),
         'courses': models.Course.objects.all().exclude(),
         'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
-        'user_courses': request.user.course_set.all().v
+        'user_courses': request.user.course_set.all()
     })
 
 
@@ -98,7 +98,7 @@ def course_join(request, course_slug):
             )
         )
     course.participants.add(request.user)
-    return redirect(reverse('wui_courses') + "?m=joined")
+    return redirect(reverse('wui_course_show', kwargs={'course_slug': course_slug}))
 
 
 @login_required()
@@ -110,7 +110,9 @@ def course_join_pw(request, course_slug):
         if form.is_valid():
             if course.password == form.cleaned_data['password']:
                 course.participants.add(request.user)
-                return redirect(reverse('wui_courses') + "?m=joined")
+                return redirect(reverse(
+                    'wui_course_show', kwargs={'course_slug': course_slug})
+                )
             else:
                 msg = _("Wrong password")
     else:
@@ -236,7 +238,7 @@ def course_manage_problems(request, course_slug):
     if request.POST:
         form = AddProbForm(request.POST, instance=course)
         if form.is_valid():
-            models.CourseProblems.drop_for_course(course)
+            course.courseproblems_set.all().delete()
             for problem in form.cleaned_data['problems']:
                 models.CourseProblems.create_or_update(course, problem)
             return redirect(reverse('wui_points_to_problems',
