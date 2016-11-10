@@ -9,7 +9,8 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <a data-toggle="collapse" href="#collapse{{ problem.title }}">{{ problem.title }} [{{ problem.points }} {% trans "points" %}]</a>
+                <a data-toggle="collapse" href="#collapse{{ problem.title }}">{{ problem.title }} [{{ problem.points }} {% trans "points" %}]
+                    {% if problem.solved %} - <strong>{% trans "Solved!" %}</strong>{% endif %}</a>
               </h4>
             </div>
             <div id="collapse{{ problem.title }}" class="panel-collapse {% if open_title != problem.title %}collapse{% endif %}">
