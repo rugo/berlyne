@@ -36,7 +36,7 @@ class CoursePwForm(Form):
 class AddProbForm(ModelForm):
     class Meta:
         model = models.Course
-        fields = ["problems"]
+        fields = ("problems",)
 
 
 class PointToProbForm(Form):
@@ -46,3 +46,9 @@ class PointToProbForm(Form):
 class SubmissionForm(Form):
     problem_slug = CharField(widget=HiddenInput)
     flag = CharField(max_length=255)
+
+
+class WriteupForm(ModelForm):
+    class Meta:
+        model = models.Submission
+        fields = ('writeup',)

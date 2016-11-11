@@ -26,6 +26,8 @@ class Course(models.Model):
     problems = models.ManyToManyField(vmapi.models.VirtualMachine,
                                       through='CourseProblems')
 
+    writeups = models.BooleanField(_("write ups"))
+
     def __str__(self):
         return "{} ({})".format(
             self.name,
@@ -76,7 +78,7 @@ class Submission(models.Model):
     problem = models.ForeignKey(CourseProblems, on_delete=models.CASCADE)
     creation_time = models.DateTimeField(auto_now_add=True)
     correct = models.BooleanField(_('correct'))
-    write_up = models.TextField(_('write up'), null=True)
+    writeup = models.TextField(_('write up'), null=True)
     user = models.ForeignKey(auth_models.User)
 
     class Meta:

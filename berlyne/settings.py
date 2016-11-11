@@ -129,7 +129,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(dir, 'static') for temp_list in TEMPLATES for dir in temp_list['DIRS']]
 
 # Berlyne specific config
-IN_TEST_MODE = 'test' in sys.argv  # hacky
+IN_TEST_MODE = True
 # This is where we get the configs and provisioning
 # for VMs to create
 DEPLOYMENT_SRC_BASEDIR = '/home/rg/thesis_src/uptomate/testfiles'

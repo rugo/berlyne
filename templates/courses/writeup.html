@@ -1,0 +1,17 @@
+{% extends "courses/detail_base.html" %}
+{% load berlyne_extra %}
+{% load i18n %}
+{% block title %}Write Write up{% endblock %}
+{% block content %}
+    <legend><span class="col-sm-offset-1">{% trans "Write Up" %}</span></legend>
+    {% trans "Here you can describe how you solved the problem, what the weakness was or give general feedback." %}
+    <form method="POST">
+    {% csrf_token %}
+
+    {% for field in form %}
+        {% include 'registration/form_field.html' %}
+    {% endfor %}
+
+    <input type="submit" value="{% trans 'Submit' %}" class="btn btn-default" />
+    </form>
+{% endblock %}

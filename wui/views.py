@@ -174,18 +174,29 @@ def course_problems(request, course_slug):
     if request.POST:
         form = SubmissionForm(request.POST)
         if form.is_valid():
-            flag_correct, course_problem = models.CourseProblems.check_problem_flag(
-                course,
-                form.cleaned_data['problem_slug'],
-                form.cleaned_data['flag']
-            )
+            flag_correct, course_problem =\
+                models.CourseProblems.check_problem_flag(
+                    course,
+                    form.cleaned_data['problem_slug'],
+                    form.cleaned_data['flag']
+                )
             try:
-                models.Submission.objects.create(
+                sub = models.Submission.objects.create(
                     flag=form.cleaned_data['flag'],
                     problem=course_problem,
                     correct=flag_correct,
                     user=request.user
                 )
+                if flag_correct and course.writeups:
+                    return redirect(
+                        reverse(
+                            'wui_course_problem_writeup',
+                            kwargs={
+                                'course_slug': course_slug,
+                                'problem_slug': course_problem.problem.slug
+                            }
+                        )
+                    )
             except ValidationError:
                 errors.append(_("You already tried that..."))
 
@@ -307,6 +318,42 @@ def course_manage_points(request, course_slug):
         request,
         "courses/manage_points.html",
         {'cp_forms': cp_forms}
+    )
+
+@login_required()
+def writeup(request, course_slug, problem_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    submission = get_object_or_404(models.Submission,
+        problem__problem__slug=problem_slug,
+        correct=True,
+        user=request.user,
+    )
+
+    if not course.writeups:
+        return redirect(reverse('wui_courses'))
+
+    form = WriteupForm(instance=submission)
+
+    if request.POST:
+        form = WriteupForm(request.POST, instance=submission)
+        if form.is_valid():
+            form.save()
+            return redirect(
+                reverse(
+                    'wui_course_problems',
+                    kwargs={
+                        'course_slug': course.name
+                    }
+                ) + '?title=' + problem_slug
+            )
+
+    return render(
+        request,
+        'courses/writeup.html',
+        {
+            'course': course,
+            'form': form,
+        }
     )
 
 
