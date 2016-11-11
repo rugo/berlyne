@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load berlyne_extra %}
 {% load i18n %}
-{% block title %}{{ course.name }}{% endblock %}
+{% block title %}{{ course.name }} {% if page %} - {{ page }}{% endif %}{% endblock %}
 {% block content %}
     <ul class="nav nav-tabs">
         <li role="presentation" {% if page == "course" %} class="active"{% endif %}>

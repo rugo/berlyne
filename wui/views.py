@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
 from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
 MESSAGES = {
     '': None,
@@ -224,12 +225,33 @@ def course_problems(request, course_slug):
 
 @login_required()
 def course_scoreboard(request, course_slug):
-    return None
+    course = get_object_or_404(models.Course, name=course_slug)
 
+    # Create list with user and points
+    user_points = enumerate(
+        models.Submission.objects.filter(
+            problem__course=course,
+            correct=True
+        ).values(
+            'user__username',
+            'user__last_name'
+        ).annotate(
+            point_sum=Sum('problem__points')
+        ).order_by(
+            'point_sum'
+        ),
+        1
+    )
 
-@login_required()
-def user_problems(request):
-    return None
+    return render(
+        request,
+        'courses/scoreboard.html',
+        {
+            'course': course,
+            'user_points': user_points,
+            'page': 'scoreboard'
+        }
+    )
 
 
 @permission_required('can_manage_course')
