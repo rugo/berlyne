@@ -12,3 +12,16 @@ th {
 .content-left {
   text-align: left;
 }
+
+.footer {
+  font-size: 90%;
+}
+
+.footer small {
+  float: left;
+}
+
+.footer ul {
+  float: right;
+  list-style: none;
+}
