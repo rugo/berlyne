@@ -18,9 +18,6 @@ LEGAL_API_VM_ACTIONS = [
     'reload'
 ]
 
-if settings.IN_TEST_MODE:
-    Deployment.TEST_MODE = True
-
 
 def _task_dict_success(task):
     return {
