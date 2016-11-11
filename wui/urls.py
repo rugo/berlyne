@@ -10,7 +10,7 @@ urlpatterns = [
             url(r'^', include('django.contrib.auth.urls')),
         ]
     )),
-    url(r'^course_create$', views.course_edit, name='wui_course_create'),
+    url(r'^course_create/$', views.course_edit, name='wui_course_create'),
     url(r'^course/$', views.courses, name='wui_courses'),
     url(r'^course/(?P<course_slug>[\w-]+)/', include(
         [
