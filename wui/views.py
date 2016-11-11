@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
 from django.core.exceptions import ValidationError
-from django.db.models import Sum
+from django.db.models import Sum, Max
 
 MESSAGES = {
     '': None,
@@ -237,8 +237,11 @@ def course_scoreboard(request, course_slug):
             'user__last_name'
         ).annotate(
             point_sum=Sum('problem__points')
+        ).annotate(
+            newest_submission=Max('creation_time')
         ).order_by(
-            'point_sum'
+            '-point_sum',
+            'newest_submission'
         ),
         1
     )
