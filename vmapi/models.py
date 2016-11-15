@@ -1,9 +1,7 @@
 from django.db import models
 
-# TODO: Align to new best practice (pass the instance)
-from celery import current_app
-from celery.states import READY_STATES, EXCEPTION_STATES
-
+from autotask import models as task_models
+from autotask.tasks import DelayedTask
 from .uptomate import Deployment
 
 DEFAULT_TASK_NAME = "unnamed_task"
@@ -50,18 +48,14 @@ class Task(models.Model):
     given.
     """
     virtual_machine = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
-    task_id = models.CharField(max_length=255, unique=True)
-    # Task name is by default not persistent unfort.
-    # So it's stored here
-    task_name = models.CharField(max_length=255)
+    task = models.ForeignKey(task_models.TaskQueue)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     # Factory method
     @classmethod
-    def create(cls, virtual_machine, async_result):
+    def create(cls, virtual_machine, task):
         return cls(virtual_machine=virtual_machine,
-                   task_id=async_result.id,
-                   task_name=async_result.task_name or DEFAULT_TASK_NAME)
+                   task_id=task.pk)
 
     @classmethod
     def create_and_launch(cls, virtual_machine, task, **task_kwargs):
@@ -72,45 +66,25 @@ class Task(models.Model):
         :param task_kwargs: task arguments
         :return: Task instance
         """
-        return Task.create(virtual_machine, task.delay(**task_kwargs))
-
-    @staticmethod
-    def get_nondb_task(task_id):
-        """
-        Returns state of task that is not stored in db.
-        This doesn't happen except somebody played with
-        the DB or called destroy_vm_db.
-
-        It is not guaranteed that the task with the given task_id
-        exists in case its state returned is PENDING.
-        :param task_id: Task_id to look for
-        :return: Dict with task info
-        """
-        return Task._create_basic_task_dict(task_id)
-
-    @staticmethod
-    def _create_basic_task_dict(task_id, json_parsable=True):
-        task = current_app.AsyncResult(task_id)
-        task_dict = {
-            'task_name': DEFAULT_TASK_NAME,
-            'task_id': task.id,
-            'state': task.state
-        }
-
-        if task.state in READY_STATES:
-            res = task.result
-            task_dict['result'] = str(res) if json_parsable else res
-        if task.state in EXCEPTION_STATES:
-            res = task.traceback
-            task_dict['taceback'] = str(res) if json_parsable else res
-
-        return task_dict
+        return Task.create(virtual_machine, task(**task_kwargs))
 
     def to_dict(self, json_parsable=True):
-        task_dict = Task._create_basic_task_dict(self.task_id, json_parsable)
+        task_dict = {
+            'task_name': self.task.function,
+            'task_id': self.task.pk,
+            'state': self.task.status
+        }
+
+        res = None
+        if self.task.status == task_models.DONE:
+            res = self.task.result
+        if self.task.status == task_models.ERROR:
+            res = self.task.error_message
+        if res is not None:
+            task_dict['result'] = str(res) if json_parsable else res
+
         vm = self.virtual_machine
         task_dict['vm'] = str(vm) if json_parsable else vm
-        task_dict['task_name'] = self.task_name
 
         return task_dict
 

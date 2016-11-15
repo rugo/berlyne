@@ -40,10 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'djcelery',
-    'kombu.transport.django',
     'vmapi',
-    'wui'
+    'wui',
+    'autotask'
 ]
 
 MIDDLEWARE = [
@@ -134,13 +133,9 @@ IN_TEST_MODE = True
 # for VMs to create
 DEPLOYMENT_SRC_BASEDIR = '/home/rg/thesis_src/uptomate/testfiles'
 
-# Celery
-BROKER_URL = 'django://'
-CELERY_TRACK_STARTED = True
-CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
-TEST_RUNNER = 'djcelery.contrib.test_runner.CeleryTestSuiteRunner'
-if IN_TEST_MODE:
-    CELERY_ALWAYS_EAGER = True
+# autotask
+AUTOTASK_IS_ACTIVE = True
+AUTOTASK_WORKER_EXECUTABLE = "/home/rg/thesis_src/uptopy/bin/python"
 
 # uptomate
 VAGR_DEPLOYMENT_PATH = '/home/rg/thesis_src/uptomate/deployments/'

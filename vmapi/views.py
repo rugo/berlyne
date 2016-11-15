@@ -63,11 +63,8 @@ def vm_create(request, vm_slug, vagrant_name):
 
 
 def task_state(request, task_id):
-    try:
-        task = models.Task.objects.get(task_id=task_id)
-        res = task.to_dict()
-    except ObjectDoesNotExist:
-        res = models.Task.get_nondb_task(task_id)
+    task = get_object_or_404(models.Task, task_id=task_id)
+    res = task.to_dict()
 
     return util.http_json_response(
         res, 200

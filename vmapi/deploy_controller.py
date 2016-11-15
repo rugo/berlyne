@@ -21,7 +21,7 @@ LEGAL_API_VM_ACTIONS = [
 
 def _task_dict_success(task):
     return {
-        'task_id': task.id
+        'task_id': task.pk
     }, 200
 
 
@@ -72,7 +72,7 @@ def create_deployment(vm_slug, vagrant_name):
     except IntegrityError:
         return "VM exists already in db", 419
 
-    t = tasks.run_on_vagr.delay(
+    t = tasks.run_on_vagr(
         vagr,
         'create'
     )
@@ -83,7 +83,7 @@ def create_deployment(vm_slug, vagrant_name):
 
 def destroy_deployment(vm):
     vagr = _vagr_factory(vm.slug)
-    return _task_dict_success(tasks.destroy_deployment.delay(vagr, vm))
+    return _task_dict_success(tasks.destroy_deployment(vagr, vm))
 
 
 def destroy_deployment_db(vm):
@@ -92,20 +92,20 @@ def destroy_deployment_db(vm):
 
 
 def destroy_deployment_fs(vm_slug):
-    return _task_dict_success(_async_res_from_slug(
+    return _task_dict_success(_task_from_slug(
         'destroy',
         vm_slug)
     )
 
 
-def _async_res_from_slug(action, vm_slug, vm_db=None, **kwargs):
+def _task_from_slug(action, vm_slug, vm_db=None, **kwargs):
     vagr = _vagr_factory(vm_slug, **kwargs)
-    return tasks.run_on_vagr.delay(vagr, action, vm_db)
+    return tasks.run_on_vagr(vagr, action, vm_db)
 
 
 def run_on_existing(action, vm_obj, **kwargs):
     if action not in LEGAL_API_VM_ACTIONS:
         return "Action is not defined", 404
-    t = _async_res_from_slug(action, vm_obj.slug, vm_obj, **kwargs)
+    t = _task_from_slug(action, vm_obj.slug, vm_obj, **kwargs)
     vm_obj.add_task(t)
     return _task_dict_success(t)
