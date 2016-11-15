@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from . import models
+from os.path import join as _joinp
 from vmapi import models as api_models
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
@@ -12,18 +13,25 @@ logger = logging.getLogger(__name__)
 
 def __setup_create_groups():
     group, created = Group.objects.get_or_create(name='teachers')
-    perm = Permission.objects.create(
+    perm_course = Permission.objects.create(
         codename="can_manage_course",
         name="can manage course",
         content_type=ContentType.objects.get_for_model(models.Course))
+    perm_vm = Permission.objects.create(
+        codename="can_manage_vm",
+        name="can manage vm",
+        content_type=ContentType.objects.get_for_model(models.Course))
     if created:
-        group.permissions.add(perm)
+        group.permissions.add(perm_course, perm_vm)
 
 
 def __setup_frontpage():
+    init_content = open(
+        _joinp(settings.BASE_DIR, "res", "init_data", "welcome_init.html")
+    ).read()
     fp, _ = FlatPage.objects.get_or_create(url="/",
                                  title="welcome",
-                                 content="<h1>Welcome</h1>")
+                                 content=init_content)
     s = Site.objects.first()
     s.domain = "berlyne.tld"
     s.name = "Berlyne.tld"
