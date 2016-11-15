@@ -46,7 +46,14 @@ def __create_test_data():
         "wtf123wtf"
     )
 
-    su = User.objects.get(pk=1)
+    su = User.objects.create_user(
+        "rg",
+        "not@lol.tld",
+        "penis123",
+        is_staff=True,
+        is_superuser=True
+    )
+
     su.groups.add(Group.objects.get(name="teachers"))
 
     problems = [
