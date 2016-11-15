@@ -19,9 +19,9 @@
                     </div>
                     <div class=".col-xs-4" style="float: left; width: 60%;">
                         <h3>
-                            {{ entry.user__username }}
+                            {{ entry.username }}
                             {% if request.user|is_in_group:"teachers" %}
-                                ({{ entry.user__last_name }})
+                                ({{ entry.last_name }})
                             {% endif %}
                         </h3>
                     </div>

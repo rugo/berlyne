@@ -6,7 +6,15 @@ from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
 from django.core.exceptions import ValidationError
-from django.db.models import Sum, Max
+from django.db.models import (
+    Sum,
+    Max,
+    Case,
+    When,
+    F,
+    IntegerField,
+    Value
+)
 
 MESSAGES = {
     '': None,
@@ -239,22 +247,24 @@ def course_scoreboard(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
 
     # Create list with user and points
-    user_points = enumerate(
-        models.Submission.objects.filter(
-            problem__course=course,
-            correct=True
-        ).values(
-            'user__username',
-            'user__last_name'
-        ).annotate(
-            point_sum=Sum('problem__points')
-        ).annotate(
-            newest_submission=Max('creation_time')
-        ).order_by(
-            '-point_sum',
-            'newest_submission'
-        ),
-        1
+    user_points = course.participants.values(
+        'username',
+    ).annotate(
+        point_sum=Sum(
+            Case(
+                When(
+                    submission__correct=True,
+                    then=F('submission__problem__points'),
+                ),
+                default=Value(0),
+                output_field=IntegerField()
+            )
+        )
+    ).annotate(
+        newest_submission=Max('submission__creation_time')
+    ).order_by(
+        '-point_sum',
+        'newest_submission'
     )
 
     return render(
@@ -262,7 +272,7 @@ def course_scoreboard(request, course_slug):
         'courses/scoreboard.html',
         {
             'course': course,
-            'user_points': user_points,
+            'user_points': enumerate(user_points, 1),
             'page': 'scoreboard'
         }
     )
