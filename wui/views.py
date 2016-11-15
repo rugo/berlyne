@@ -357,5 +357,15 @@ def writeup(request, course_slug, problem_slug):
     )
 
 
+def register(request):
+    form = UserEmailCreateForm()
+    if request.POST:
+        form = UserEmailCreateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    return render(request, "registration/register.html", {'form': form})
+
+
 def index(request):
     return redirect('pages/')

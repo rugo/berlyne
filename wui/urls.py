@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^accounts/', include(
         [
             url(r'^profile/$', views.profile, name='wui_acc_profile'),
+            url(r'^register/$', views.register, name='wui_acc_register'),
             url(r'^', include('django.contrib.auth.urls')),
         ]
     )),

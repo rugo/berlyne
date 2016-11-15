@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <legend><span class="col-sm-offset-1">{% trans "Account Registration" %}</span></legend>
+{% if form.errors %}
+            <div class="alert alert-danger">
+                <p>{% trans "Invalid data was submitted" %}</p>
+            </div>
+{% endif %}
+
+<form method="post" action="{% url 'wui_acc_register' %}">
+{% csrf_token %}
+
+{% for field in form %}
+    {% include 'registration/form_field.html' %}
+{% endfor %}
+
+<input type="submit" value="{% trans "Register" %}" style="margin-top: 3em;" class="btn btn-default" />
+</form>
+{% endblock %}
