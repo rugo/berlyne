@@ -21,7 +21,9 @@
                         <h3>
                             {{ entry.username }}
                             {% if request.user|is_in_group:"teachers" %}
-                                ({{ entry.last_name }})
+                                {% if entry.last_name %}
+                                    ({{ entry.last_name }})
+                                {% endif %}
                             {% endif %}
                         </h3>
                     </div>

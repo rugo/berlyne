@@ -29,8 +29,9 @@ class CourseForm(ModelForm):
             'name',
             'description',
             'show_scoreboard',
+            'writeups',
             'password',
-            'point_threshold'
+            'point_threshold',
         ]
 
 

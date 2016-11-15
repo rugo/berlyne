@@ -249,6 +249,7 @@ def course_scoreboard(request, course_slug):
     # Create list with user and points
     user_points = course.participants.values(
         'username',
+        'last_name'
     ).annotate(
         point_sum=Sum(
             Case(

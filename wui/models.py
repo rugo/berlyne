@@ -26,7 +26,7 @@ class Course(models.Model):
     problems = models.ManyToManyField(vmapi.models.VirtualMachine,
                                       through='CourseProblems')
 
-    writeups = models.BooleanField(_("write ups"))
+    writeups = models.BooleanField(_("activate write ups"))
 
     def __str__(self):
         return "{} ({})".format(
