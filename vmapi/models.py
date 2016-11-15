@@ -1,7 +1,6 @@
 from django.db import models
 
 from autotask import models as task_models
-from autotask.tasks import DelayedTask
 from .uptomate import Deployment
 
 DEFAULT_TASK_NAME = "unnamed_task"
