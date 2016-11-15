@@ -363,7 +363,7 @@ def register(request):
         form = UserEmailCreateForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            return redirect('wui_courses')
     return render(request, "registration/register.html", {'form': form})
 
 
