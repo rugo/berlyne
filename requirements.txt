@@ -1,5 +1,3 @@
 Berlyne
 django
-celery
-django-celery
-kombu
+autotask

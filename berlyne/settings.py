@@ -128,13 +128,13 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(dir, 'static') for temp_list in TEMPLATES for dir in temp_list['DIRS']]
 
 # Berlyne specific config
-IN_TEST_MODE = True
+IN_TEST_MODE = DEBUG
 # This is where we get the configs and provisioning
 # for VMs to create
 DEPLOYMENT_SRC_BASEDIR = '/home/rg/thesis_src/uptomate/testfiles'
 
 # autotask
-AUTOTASK_IS_ACTIVE = True
+AUTOTASK_IS_ACTIVE = not IN_TEST_MODE
 AUTOTASK_WORKER_EXECUTABLE = "/home/rg/thesis_src/uptopy/bin/python"
 
 # uptomate
