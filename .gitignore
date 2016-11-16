@@ -3,3 +3,4 @@ uptomate/
 *.sqlite3
 *.pyc
 */migrations/000*
+res/*_creds.txt
