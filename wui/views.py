@@ -69,7 +69,7 @@ def course_edit(request, course_slug=None):
 def courses(request):
     return render(request, 'courses/list.html', {
         'headline': _('Courses'),
-        'courses': models.Course.objects.all().exclude(),
+        'courses': models.Course.objects.all(),
         'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
         'user_courses': request.user.course_set.all()
     })
