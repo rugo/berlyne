@@ -2,4 +2,4 @@ uptomate/
 .idea/
 *.sqlite3
 *.pyc
-migrations/000*
+*/migrations/000*
