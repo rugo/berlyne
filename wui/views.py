@@ -47,11 +47,12 @@ def course_edit(request, course_slug=None):
         if form.is_valid():
             form.instance.teacher = request.user
             form.save()
-        if not course_slug:
-            return redirect(
-                reverse('wui_course_manage_problems',
-                        kwargs={'course_slug': form.cleaned_data['name']})
-            )
+
+            if not course_slug:
+                return redirect(
+                    reverse('wui_course_manage_problems',
+                            kwargs={'course_slug': form.cleaned_data['name']})
+                )
     else:
         if course_slug:
             form = CourseForm(
