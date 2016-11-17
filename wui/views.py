@@ -386,5 +386,56 @@ def register(request):
     return render(request, "registration/register.html", {'form': form})
 
 
+@permission_required('can_manage_course')
+def course_writeups(request, course_slug):
+    course = get_object_or_404(models.Course, name=course_slug)
+    submissions = models.Submission.objects.filter(
+        writeup__isnull=False,
+        problem__course=course
+    ).values(
+        'problem__problem__slug',
+        'creation_time',
+        'user__username',
+        'user__last_name'
+    ).order_by(
+        'problem__problem__slug',
+        'creation_time'
+    )
+
+    errors = []
+
+    if not course.writeups:
+        errors.append(_("Write ups are disabled for this course"))
+
+    return render(
+        request,
+        'courses/show_writeups.html',
+        {
+            'submissions': submissions,
+            'errors': errors,
+            'page': "writeups",
+            'course': course
+        }
+    )
+
+
+@permission_required('can_manage_course')
+def show_writeup(request, course_slug, problem_name, user_name):
+    sub = get_object_or_404(
+        models.Submission,
+        user__username=user_name,
+        problem__problem__slug=problem_name,
+        problem__course__name=course_slug
+    )
+
+    return render(
+        request,
+        'courses/show_writeup.html',
+        {
+            "sub": sub
+        }
+    )
+
+
 def index(request):
     return redirect('pages/')

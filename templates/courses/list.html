@@ -31,7 +31,7 @@
                         <td>&#10060;</td>
                     {% endif %}
                     <td>{% if c.teacher.last_name %}{{ c.teacher.last_name }}{% else %}{{ c.teacher }}{% endif %}</td>
-                    <td>{{ c.creation_time }}</td>
+                    <td>{{ c.creation_time|date:"d M Y" }}</td>
                     <td>
                         <div class="dropdown">
                           <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">

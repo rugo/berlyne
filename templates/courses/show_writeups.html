@@ -1,0 +1,28 @@
+{% extends "courses/detail_base.html" %}
+{% load i18n %}
+{% block title %}{{ course_name }} - {% trans "write ups" %}{% endblock %}
+{% block details %}
+<h1>{% trans "Course write ups for " %} {{ course.name }}</h1>
+
+      <!-- Table -->
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>{% trans "Problem" %}</th>
+                  <th>{% trans "User" %}</th>
+                  <th>{% trans "Created" %}</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for s in submissions %}
+                <tr>
+                    <td>{{ s.problem__problem__slug }}</td>
+                    <td> {{ s.user__username }} {% if  s.user__last_name %}({{ s.user__last_name }}){% endif %}</td>
+                    <td>{{ s.creation_time|date:"d M y" }}, {{ s.creation_time|time:"H:i" }} UTC</td>
+                    <td><a class="btn btn-primary" href="{% url "wui_course_writeup_show" course.name s.problem__problem__slug s.user__username %}">{% trans "View" %}</a></td>
+                </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+{% endblock %}
