@@ -289,9 +289,10 @@ def course_manage_problems(request, course_slug):
     if request.POST:
         form = AddProbForm(request.POST, instance=course)
         if form.is_valid():
-            course.courseproblems_set.all().delete()
             for problem in form.cleaned_data['problems']:
-                models.CourseProblems.create_or_update(course, problem)
+                models.CourseProblems.objects.update_or_create(
+                    course=course, problem=problem, defaults={'points': 0}
+                )
             return redirect(reverse('wui_points_to_problems',
                                     kwargs={'course_slug': course_slug}))
 
@@ -316,10 +317,11 @@ def course_manage_points(request, course_slug):
             form = PointToProbForm(request.POST, prefix=prob.slug)
             cp_forms.append(form)
             if form.is_valid():
-                models.CourseProblems.create_or_update(
-                    course,
-                    prob,
-                    form.cleaned_data['points']
+                models.CourseProblems.objects.filter(
+                    course=course,
+                    problem=prob
+                ).update(
+                    points = form.cleaned_data['points']
                 )
             else:
                 break

@@ -52,14 +52,6 @@ class CourseProblems(models.Model):
     class Meta:
         unique_together = ('course', 'problem')
 
-    @classmethod
-    def create_or_update(cls, course, problem, points=0):
-        cp = cls.objects.filter(course=course, problem=problem).first()
-        if not cp:
-            cp = cls(course=course, problem=problem, points=points)
-        cp.points = points
-        cp.save()
-
     @staticmethod
     def check_problem_flag(course, problem_slug, flag):
         cp = CourseProblems.objects.get(
@@ -70,7 +62,7 @@ class CourseProblems(models.Model):
         return correct, cp
 
     def __str__(self):
-        return str(self.problem)
+        return "{}[{}]".format(str(self.problem).capitalize(), self.points)
 
 
 class Submission(models.Model):
