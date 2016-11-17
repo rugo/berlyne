@@ -10,6 +10,7 @@ def run_on_vagr(vagr_depl, f, vm_db=None, **kwargs):
     if vm_db is not None:
         try:
             vm_db.ip_addr = vagr_depl.service_network_address()
+            vm_db.save()
         except BaseException:
             # this does not work all the time, e.g. when the command
             # was 'stop', however, that should never affect the
