@@ -12,17 +12,27 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+def _read_res_conf(name):
+    l = open(os.path.join(RES_DIR, name + "_creds.txt")).read().strip().split(":")
+    if len(l) == 1:
+        return l[0]
+    return l
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES_DIR = os.path.join(BASE_DIR, "res")
 
-SECRET_KEY = open(os.path.join(RES_DIR, "secret_key.txt")).read()
+SECRET_KEY = _read_res_conf("secret_key")
 
 DEBUG = False
 
 # Only the proxy can connect to the app
 # Host header attacks are treated at the proxy
-ALLOWED_HOSTS = ['127.0.0.1']
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+ALLOWED_HOSTS = ['berlyne.wass-ctf.xyz']
+CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 
 # Application definition
 INSTALLED_APPS = [
@@ -73,7 +83,7 @@ WSGI_APPLICATION = 'berlyne.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-__db_creds = open(os.path.join(RES_DIR, "db_creds.txt")).read().split()
+__db_creds = _read_res_conf("db")
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -126,13 +136,13 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(dir, 'static') for temp_list in TEMPLATES for dir in temp_list['DIRS']]
 
 # Berlyne specific config
-IN_TEST_MODE = DEBUG
+IN_TEST_MODE = False
 # This is where we get the configs and provisioning
 # for VMs to create
 DEPLOYMENT_SRC_BASEDIR = '/opt/berlyne/deployment_src/'
 
 # autotask
-AUTOTASK_IS_ACTIVE = not IN_TEST_MODE
+AUTOTASK_IS_ACTIVE = True
 # AUTOTASK_WORKER_EXECUTABLE = "/home/rg/thesis_src/uptopy/bin/python"
 
 # uptomate
@@ -145,5 +155,5 @@ SITE_ID = 1
 # Email
 DEFAULT_FROM_EMAIL = "noreply@ht11.org"
 EMAIL_HOST = "smtp.adminflex.de"
-EMAIL_HOST_USER, EMAIL_HOST_PASSWORD = open(os.path.join(RES_DIR, "email_creds.txt")).read().split(":")
+EMAIL_HOST_USER, EMAIL_HOST_PASSWORD = _read_res_conf("email")
 

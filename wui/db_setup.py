@@ -33,8 +33,8 @@ def __setup_frontpage():
                                  title="welcome",
                                  content=init_content)
     s = Site.objects.first()
-    s.domain = "berlyne.tld"
-    s.name = "Berlyne.tld"
+    s.domain = settings.ALLOWED_HOSTS[0]
+    s.name = "Berlyne"
     s.save()
     fp.sites.add(s)
 
