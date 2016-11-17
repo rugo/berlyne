@@ -134,7 +134,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "public", "static")
-STATICFILES_DIRS = [os.path.join(dir, 'static') for temp_list in TEMPLATES for dir in temp_list['DIRS']]
+STATICFILES_DIRS = [os.path.join(dir_t, 'static') for temp_list in TEMPLATES for dir_t in temp_list['DIRS']]
 
 # Berlyne specific config
 IN_TEST_MODE = False

@@ -125,7 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(dir, 'static') for temp_list in TEMPLATES for dir in temp_list['DIRS']]
+STATICFILES_DIRS = [os.path.join(dir_t, 'static') for temp_list in TEMPLATES for dir_t in temp_list['DIRS']]
 
 # Berlyne specific config
 IN_TEST_MODE = DEBUG
@@ -143,9 +143,4 @@ VAGR_VAGRANT_PATH = '/home/rg/thesis_src/uptomate/vagrantfiles/'
 
 # Flatpages
 SITE_ID = 1
-#email
-# DEFAULT_FROM_EMAIL = "berlyne@ht11.org"
-# EMAIL_HOST = "smtp.adminflex.de"
-# EMAIL_HOST_USER = "xxx"
-# EMAIL_HOST_PASSWORD = "xx"
 

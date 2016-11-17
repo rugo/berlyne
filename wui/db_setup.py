@@ -29,9 +29,11 @@ def __setup_frontpage():
     init_content = open(
         _joinp(settings.BASE_DIR, "res", "init_data", "welcome_init.html")
     ).read()
-    fp, _ = FlatPage.objects.get_or_create(url="/",
-                                 title="welcome",
-                                 content=init_content)
+    fp, _ = FlatPage.objects.get_or_create(
+        url="/",
+        title="welcome",
+        content=init_content
+    )
     s = Site.objects.first()
     s.domain = settings.ALLOWED_HOSTS[0]
     s.name = "Berlyne"

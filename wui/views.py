@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from . import models
-from vmapi import models as api_models
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
@@ -190,7 +189,7 @@ def course_problems(request, course_slug):
                     form.cleaned_data['flag']
                 )
             try:
-                sub = models.Submission.objects.create(
+                models.Submission.objects.create(
                     flag=form.cleaned_data['flag'],
                     problem=course_problem,
                     correct=flag_correct,
@@ -332,10 +331,12 @@ def course_manage_points(request, course_slug):
         {'cp_forms': cp_forms}
     )
 
+
 @login_required()
 def writeup(request, course_slug, problem_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    submission = get_object_or_404(models.Submission,
+    submission = get_object_or_404(
+        models.Submission,
         problem__problem__slug=problem_slug,
         correct=True,
         user=request.user,

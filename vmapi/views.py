@@ -12,6 +12,7 @@ def _run_task_on_existing_vm(action, vm_slug, **kwargs):
         *deploy_controller.run_on_existing(action, vm, **kwargs)
     )
 
+
 @permission_required('can_manage_vm')
 def vm_start_provider(request, vm_slug, provider):
     return _run_task_on_existing_vm('start', vm_slug, provider=provider)
