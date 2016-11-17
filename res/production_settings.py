@@ -144,7 +144,6 @@ DEPLOYMENT_SRC_BASEDIR = '/opt/berlyne/deployment_src/'
 
 # autotask
 AUTOTASK_IS_ACTIVE = True
-# AUTOTASK_WORKER_EXECUTABLE = "/home/rg/thesis_src/uptopy/bin/python"
 
 # uptomate
 VAGR_DEPLOYMENT_PATH = '/opt/berlyne/deployments/'
