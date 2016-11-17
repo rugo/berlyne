@@ -1,6 +1,6 @@
 {% extends "courses/detail_base.html" %}
 {% load i18n %}
-{% block title %}{{ course_name }} - {% trans "write ups" %}{% endblock %}
+{% block title %}{{ course.name }} - {% trans "write ups" %}{% endblock %}
 {% block details %}
 <h1>{% trans "Course write ups for " %} {{ course.name }}</h1>
 
