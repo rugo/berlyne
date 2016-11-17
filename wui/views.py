@@ -152,7 +152,7 @@ def _course_problem_dict(course, user):
         problems = categories.get(category, [])
 
         problems.append({
-            'title': course_prob.problem.slug,
+            'title': course_prob.problem.slug.capitalize(),
             'points': course_prob.points,
             'desc': course_prob.problem.desc,
             'form': SubmissionForm(initial={
