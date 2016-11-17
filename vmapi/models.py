@@ -4,6 +4,7 @@ from autotask import models as task_models
 from .uptomate import Deployment
 
 DEFAULT_TASK_NAME = "unnamed_task"
+TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
 
 
 class VirtualMachine(models.Model):
@@ -71,7 +72,7 @@ class Task(models.Model):
         task_dict = {
             'task_name': self.task.function,
             'task_id': self.task.pk,
-            'state': self.task.status
+            'state': TASK_STATUS_NAMES[self.task.status]
         }
 
         res = None
