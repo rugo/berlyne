@@ -1,5 +1,6 @@
 from autotask.tasks import delayed_task
 from .uptomate import Deployment
+
 MSG_SUCCESS = "Finished"
 
 
@@ -7,7 +8,13 @@ MSG_SUCCESS = "Finished"
 def run_on_vagr(vagr_depl, f, vm_db=None, **kwargs):
     getattr(Deployment.Vagrant, f)(vagr_depl, **kwargs)
     if vm_db is not None:
-        vm_db.ip_addr = vagr_depl.service_network_address()
+        try:
+            vm_db.ip_addr = vagr_depl.service_network_address()
+        except BaseException:
+            # this does not work all the time, e.g. when the command
+            # was 'stop', however, that should never affect the
+            # result of the actual command called
+            pass
     return MSG_SUCCESS
 
 
