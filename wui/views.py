@@ -173,6 +173,7 @@ def _course_problem_dict(course, user):
     return categories, total_points
 
 
+# TODO: put in fewer queries and split view
 @login_required()
 def course_problems(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
