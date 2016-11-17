@@ -4,7 +4,7 @@ from . import models
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
-from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import (
     Sum,
     Max,
@@ -158,6 +158,9 @@ def _course_problem_dict(course, user):
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
             ),
+            'solved_count': course_prob.submission_set.filter(
+                correct=True
+            ).count(),
             'solved': course_prob.submission_set.filter(
                 user=user,
                 correct=True,
@@ -205,7 +208,7 @@ def course_problems(request, course_slug):
                             }
                         )
                     )
-            except ValidationError:
+            except IntegrityError:
                 errors.append(_("You already tried that..."))
 
             if flag_correct:

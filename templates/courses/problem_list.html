@@ -14,7 +14,10 @@
               </h4>
             </div>
             <div id="collapse{{ problem.title }}" class="panel-collapse {% if open_title != problem.title %}collapse{% endif %}">
-              <div class="panel-body">{% autoescape off %}{{ problem.desc }}{% endautoescape %}</div>
+              <div class="panel-body">
+                  <p>{% autoescape off %}{{ problem.desc }}{% endautoescape %}</p>
+                  <small>- {% blocktrans with solved_count=problem.solved_count %} Solved {{ solved_count }} times - {% endblocktrans %}</small>
+              </div>
               <div class="panel-footer">
                   {% if problem.solved %}
                     {% trans "Solved!" %}
