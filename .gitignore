@@ -4,3 +4,5 @@ uptomate/
 *.pyc
 */migrations/000*
 res/*_creds.txt
+/setup/
+.vagrant/
