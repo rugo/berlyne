@@ -156,12 +156,13 @@ DEPLOYMENT_SRC_BASEDIR = '/home/rg/thesis_src/uptomate/testfiles'
 TASK_TTL = 60 * 60 * 24
 
 # autotask
-AUTOTASK_IS_ACTIVE = not IN_TEST_MODE
+AUTOTASK_IS_ACTIVE = True
 AUTOTASK_WORKER_EXECUTABLE = "/home/rg/thesis_src/uptopy/bin/python"
 
 # uptomate
 VAGR_DEPLOYMENT_PATH = '/home/rg/thesis_src/uptomate/deployments/'
 VAGR_VAGRANT_PATH = '/home/rg/thesis_src/uptomate/vagrantfiles/'
+VAGR_DEFAULT_VAGR_FILE = 'ubuntu_docker'
 
 # Flatpages
 SITE_ID = 1

@@ -1,6 +1,7 @@
 from django.conf import settings
 from os import path
 from django.db import IntegrityError
+from glob import glob
 
 from uptomate.Deployment import Vagrant
 from uptomate import Deployment, Provider
@@ -17,6 +18,17 @@ LEGAL_API_VM_ACTIONS = [
     'suspend',
     'reload'
 ]
+
+
+__AVAIL_VAGR_FILES = []
+
+
+def get_avail_vagrant_files():
+    if not __AVAIL_VAGR_FILES:
+        for p in glob(path.join(settings.VAGR_VAGRANT_PATH, '*')):
+            if path.isfile(p):
+                __AVAIL_VAGR_FILES.append(path.split(p)[-1])
+    return __AVAIL_VAGR_FILES
 
 
 def _task_dict_success(task):
@@ -109,3 +121,16 @@ def run_on_existing(action, vm_obj, **kwargs):
     t = _task_from_slug(action, vm_obj.slug, vm_obj, **kwargs)
     vm_obj.add_task(t)
     return _task_dict_success(t)
+
+
+def find_installable_problems():
+    problems = []
+    for task_path in glob(
+            path.join(
+                settings.DEPLOYMENT_SRC_BASEDIR,
+                "*",
+                Deployment.CONFIG_FILE_NAME
+            )
+    ):
+        problems.append(path.split(path.dirname(task_path))[-1])
+    return problems

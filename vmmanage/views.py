@@ -1,9 +1,19 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 from . import models
 from . import util
 from . import deploy_controller
+from . import forms
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.decorators import permission_required
+from django.urls import reverse
+
+
+_INSTALL_MSGS = {
+    'formerror': _("The submitted form was invalid!"),
+    'success': _("The problem is getting installed, this may take a while.")
+}
 
 
 def _run_task_on_existing_vm(action, vm_slug, **kwargs):
@@ -76,4 +86,46 @@ def task_state(request, task_id):
 
     return util.http_json_response(
         res, 200
+    )
+
+
+# TODO: Make nicer, enhance usability in case of F-5s and get param
+@permission_required("can_manage_vm")
+def show_installable_problems(request):
+    problems = deploy_controller.find_installable_problems()
+    msgs = []
+    if not problems:
+        msgs.append(_("No problems are available for installation"))
+
+    msg = request.GET.get("m", "")
+    if msg:
+        msgs.append(_INSTALL_MSGS[msg])
+
+    return render(
+        request,
+        "vms/installable.html",
+        {
+            "problems": problems,
+            "vagrant_form": forms.VagrantFilesForm(
+                initial={'vagrant_file': settings.VAGR_DEFAULT_VAGR_FILE}
+            ),
+            "errors": msgs,
+        }
+    )
+
+
+@permission_required("can_manage_vm")
+def install_problem(request):
+    if not request.POST:
+        return redirect('vmmanage_show_installable')
+    form = forms.VagrantFilesForm(request.POST)
+    if form.is_valid():
+        vagr_name = form.cleaned_data['vagrant_file']
+        problem_name = request.POST['problem']
+        deploy_controller.create_deployment(problem_name, vagr_name)
+    else:
+        return redirect(reverse('vmmanage_show_installable') + '?m=formerror')
+
+    return redirect(
+        reverse('vmmanage_show_installable') + '?m=success'
     )

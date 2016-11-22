@@ -25,4 +25,6 @@ urlpatterns = [
                 ),
             ),
     ])),
+    url(r'install/$', views.show_installable_problems, name="vmmanage_show_installable"),
+    url(r'install_task/$', views.install_problem, name="vmmanage_install_problem")
 ]

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load berlyne_extra %}
+{% load i18n %}
+{% block title %}{% trans "Installable tasks" %}{% endblock %}
+{% block content %}
+    <h1>Available tasks</h1>
+    {% if errors %}
+        {% for error in errors %}
+            <div class="alert alert-danger">
+              {{ error }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% if success %}
+        {% for msg in success %}
+            <div class="alert alert-success">
+              {{ msg }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <hr>
+
+    <table>
+    {% for problem in problems %}
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'Problem:' %} <strong>{{ problem }}</strong></h3>
+          </div>
+          <div class="panel-body">
+              <form action="{% url 'vmmanage_install_problem' %}" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="problem" value="{{ problem }}">
+                {{ vagrant_form.as_p }} <input type="submit" value="{% trans 'install' %}" class="btn btn-primary">
+              </form>
+          </div>
+        </div>
+    {% endfor %}
+    </table>
+
+{% endblock %}
