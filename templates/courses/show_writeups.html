@@ -4,6 +4,11 @@
 {% block details %}
 <h1>{% trans "Write ups for " %} {{ course.name }}</h1>
 
+    {% if not submissions %}
+        <div class="alert alert-info">
+              {% trans 'There are no submissions yet.' %}
+        </div>
+    {% else %}
       <!-- Table -->
       <table class="table">
           <thead>
@@ -25,4 +30,5 @@
               {% endfor %}
           </tbody>
       </table>
+    {% endif %}
 {% endblock %}
