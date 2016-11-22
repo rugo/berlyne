@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'vmapi',
+    'vmmanage',
     'wui',
     'autotask'
 ]
@@ -153,6 +153,7 @@ IN_TEST_MODE = DEBUG
 # This is where we get the configs and provisioning
 # for VMs to create
 DEPLOYMENT_SRC_BASEDIR = '/home/rg/thesis_src/uptomate/testfiles'
+TASK_TTL = 60 * 60 * 24
 
 # autotask
 AUTOTASK_IS_ACTIVE = not IN_TEST_MODE

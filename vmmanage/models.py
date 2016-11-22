@@ -1,7 +1,7 @@
 from django.db import models
 
 from autotask import models as task_models
-from .uptomate import Deployment
+from uptomate import Deployment
 
 DEFAULT_TASK_NAME = "unnamed_task"
 TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
@@ -9,8 +9,10 @@ TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
 
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     ip_addr = models.CharField(max_length=45)
+    last_state = models.CharField(max_length=255)
 
     # Attrs used from config
     desc = models.TextField(max_length=1024)
@@ -37,7 +39,8 @@ class VirtualMachine(models.Model):
 
 
 class Port(models.Model):
-    number = models.IntegerField(primary_key=True)
+    number = models.IntegerField(unique=True)
+    description = models.CharField(max_length=255)
     vm = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
 
 

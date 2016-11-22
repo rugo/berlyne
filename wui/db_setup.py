@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from . import models
 from os.path import join as _joinp
-from vmapi import models as api_models
+from vmmanage import models as api_models
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
 from django.conf import settings

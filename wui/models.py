@@ -1,5 +1,5 @@
 from django.db import models
-import vmapi.models
+import vmmanage.models
 from django.contrib.auth import models as auth_models
 from django.utils.translation import ugettext_lazy as _
 
@@ -23,7 +23,7 @@ class Course(models.Model):
     point_threshold = models.IntegerField(_('point threshold'), )
 
     # instances of problems (VMs)
-    problems = models.ManyToManyField(vmapi.models.VirtualMachine,
+    problems = models.ManyToManyField(vmmanage.models.VirtualMachine,
                                       through='CourseProblems')
 
     writeups = models.BooleanField(_("activate write ups"))
@@ -44,7 +44,7 @@ class Course(models.Model):
 class CourseProblems(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     problem = models.ForeignKey(
-        vmapi.models.VirtualMachine,
+        vmmanage.models.VirtualMachine,
         on_delete=models.CASCADE
     )
     points = models.IntegerField()

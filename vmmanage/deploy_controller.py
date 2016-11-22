@@ -2,8 +2,8 @@ from django.conf import settings
 from os import path
 from django.db import IntegrityError
 
-from .uptomate.Deployment import Vagrant
-from .uptomate import Deployment, Provider
+from uptomate.Deployment import Vagrant
+from uptomate import Deployment, Provider
 from . import tasks
 from . import models
 
