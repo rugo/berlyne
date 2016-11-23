@@ -19,6 +19,8 @@ LEGAL_API_VM_ACTIONS = [
     'reload'
 ]
 
+FLAG_FILE_NAME = "flag.txt"
+
 
 __AVAIL_VAGR_FILES = []
 
@@ -81,6 +83,9 @@ def install_deployment(vagr_depl, vm):
         raise ValueError("Problem config ist missing '{}' field".format(str(ex)))
 
     vagr_depl.set_config(config)
+    with vagr_depl.open_file(FLAG_FILE_NAME) as f:
+        f.write(config['flag'])
+
 
 
 def __install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
