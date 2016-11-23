@@ -13,7 +13,8 @@ from django.urls import reverse
 
 _INSTALL_MSGS = {
     'formerror': _("The submitted form was invalid!"),
-    'success': _("The problem is getting installed, this may take a while.")
+    'success': _("The problem is getting installed, this may take a while."),
+    'exists': _("A problem with that slug is already installed!")
 }
 
 
@@ -123,6 +124,8 @@ def install_problem(request):
     if form.is_valid():
         vagr_name = form.cleaned_data['vagrant_file']
         problem_name = request.POST['problem']
+        if models.VirtualMachine.objects.filter(slug=problem_name).exists():
+            return redirect(reverse('vmmanage_show_installable') + '?m=exists')
         deploy_controller.create_deployment(problem_name, vagr_name)
     else:
         return redirect(reverse('vmmanage_show_installable') + '?m=formerror')
