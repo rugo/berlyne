@@ -16,6 +16,8 @@
                 <li class="list-group-item"><strong>{% trans 'Description' %}</strong>: {{ problem.desc }}</li>
                 <li class="list-group-item"><strong>{% trans 'IP-Address' %}</strong>: {{ problem.ip_addr }}</li>
                 <li class="list-group-item"><strong>{% trans 'Category' %}</strong>: {{ problem.category }}</li>
+                <li class="list-group-item"><strong>{% trans 'Tags' %}</strong>: {% for t in problem.tag_set.all %}{{ t.name }} {% endfor %}</li>
+
                 <li class="list-group-item"><strong>{% trans 'Flag' %}</strong>: {{ problem.flag }}</li>
               </ul>
                 <p>{% trans 'Manually perform tasks on the problem:' %}</p>

@@ -48,6 +48,8 @@ class VirtualMachine(models.Model):
         self.desc = config['desc']
         self.category = config['category']
         config['flag'] = self.assign_flag(config.get('flag', ''))
+        for t in config['tags']:
+            self.tag_set.add(Tag.objects.update_or_create(name=t)[0])
         self.save()
         return config
 
@@ -85,6 +87,10 @@ class VirtualMachine(models.Model):
     def __str__(self):
         return self.slug
 
+
+class Tag(models.Model):
+    name = models.SlugField(_("name"), unique=True)
+    vm = models.ManyToManyField(VirtualMachine)
 
 class Port(models.Model):
     host_port = models.IntegerField(_("host port"), unique=True)
