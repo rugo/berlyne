@@ -2,6 +2,7 @@ from django.db import models, transaction
 from autotask import models as task_models
 from uptomate import Deployment
 from random import randint, choice as rand_choice
+from django.utils.translation import ugettext_lazy as _
 import string
 
 MIN_PORT = 1025
@@ -17,13 +18,13 @@ TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
 
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(_("name"), max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    ip_addr = models.CharField(max_length=45)
+    ip_addr = models.CharField(_("IP Address"), max_length=45)
 
     # Attrs used from config
-    desc = models.TextField(max_length=1024)
-    category = models.CharField(max_length=255)
+    desc = models.TextField(_("description"), max_length=1024)
+    category = models.CharField(_("Category"), max_length=255)
     flag = models.CharField(max_length=255)
 
     # Stores config of problem running on this machine
@@ -86,9 +87,9 @@ class VirtualMachine(models.Model):
 
 
 class Port(models.Model):
-    host_port = models.IntegerField(unique=True)
-    guest_port = models.IntegerField()
-    description = models.CharField(max_length=255)
+    host_port = models.IntegerField(_("host port"), unique=True)
+    guest_port = models.IntegerField(_("guest port"), )
+    description = models.CharField(_("description"), max_length=255)
     vm = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
 
     @staticmethod
@@ -102,7 +103,7 @@ class Port(models.Model):
 
 
 class State(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(_("name"), max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     vm = models.ForeignKey(VirtualMachine)
 
@@ -122,7 +123,7 @@ class Task(models.Model):
     """
     virtual_machine = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
     task = models.ForeignKey(task_models.TaskQueue)
-    task_name = models.CharField(max_length=255)
+    task_name = models.CharField(_("name"), max_length=255)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
