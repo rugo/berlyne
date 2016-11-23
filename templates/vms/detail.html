@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load vm_extra %}
+{% load i18n %}
+{% block title %}{{ problem.slug }} - {{ problem.name }}{% endblock %}
+{% block content %}
+    <h1>{{ problem.slug }} - {% trans 'details' %}</h1>
+    <div class="row">
+        <div class="panel panel-default">
+              <!-- Default panel contents -->
+              <div class="panel-heading">{{ problem.slug }} - {{ problem.name }}</div>
+              <div class="panel-body">
+              <ul class="list-group">
+                <li class="list-group-item"><strong>{% trans 'Created' %}Created</strong>: {{ problem.created_at }}</li>
+                <li class="list-group-item"><strong>{% trans 'Description' %}</strong>: {{ problem.desc }}</li>
+                <li class="list-group-item"><strong>{% trans 'IP-Address' %}</strong>: {{ problem.ip_addr }}</li>
+                <li class="list-group-item"><strong>{% trans 'Category' %}</strong>: {{ problem.category }}</li>
+                <li class="list-group-item"><strong>{% trans 'Flag' %}</strong>: {{ problem.flag }}</li>
+              </ul>
+                <p>{% trans 'Manually perform tasks on the problem:' %}</p>
+                  <div class="row">
+                          {% for action in actions %}
+                              <div class="col-md-1 col-centered">
+                                 <a href="{% url 'vmmanage_perform_action' problem.slug action %}" class="btn btn-primary">{{ action|capfirst }}</a>
+                              </div>
+                          {% endfor %}
+                  </div>
+              </div>
+            </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+              <!-- Default panel contents -->
+              <div class="panel-heading">{% trans 'States' %}</div>
+              <div class="panel-body">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th>{% trans 'Name' %}</th>
+                        <th>{% trans 'Time reached' %}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {% for state in problem.state_set.all %}
+                              <tr>
+                                <td>{{ state.name }}</td>
+                                <td>{{ state.created }}</td>
+                              </tr>
+                    {% endfor %}
+                </table>
+              </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+
+              <div class="panel-heading">{% trans 'Tasks' %}</div>
+              <div class="panel-body">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th>{% trans 'Name' %}</th>
+                        <th>{% trans 'Created' %}</th>
+                        <th>{% trans 'State' %}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {% for task in problem.task_set.all %}
+                          <tr data-toggle="collapse" data-target="#accordion-{{ task.task.pk }}" class="clickable {{ task.task.status|task_css_class }}">
+                            <td>{{ task.task_name }}</td>
+                            <td>{{ task.creation_date }}</td>
+                            <td>{{ task.get_state_name }}</td>
+                          </tr>
+                          <tr>
+                            <td colspan="3">
+                                <div id="accordion-{{ task.task.pk }}" class="collapse">
+                                    <strong>{% trans "Result" %}</strong>: {{ task.task.result.value_to_string }}
+                                    <br />
+                                    <strong>{% trans "Error" %}</strong>: {{ task.task.error_message }}
+                                </div>
+                            </td>
+                          </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

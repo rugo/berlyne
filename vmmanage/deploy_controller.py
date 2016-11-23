@@ -12,8 +12,8 @@ from . import models
 LEGAL_API_VM_ACTIONS = [
     'start',
     'stop',
-    'status',
-    'address',
+    # 'status',
+    # 'address',
     'resume',
     'suspend',
     'reload'
@@ -71,6 +71,22 @@ def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=None):
     )
 
 
+def install_deployment(vagr_depl, vm):
+    if isinstance(vm, str):
+        vm = models.VirtualMachine.objects.get(slug=vm)
+
+    try:
+        config = vm.set_align_config(vagr_depl.get_config())
+    except KeyError as ex:
+        raise ValueError("Problem config ist missing '{}' field".format(str(ex)))
+
+    vagr_depl.set_config(config)
+
+
+def __install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
+    install_deployment(vagr_depl, vm_db)
+
+
 def create_deployment(vm_slug, vagrant_name):
     if isinstance(vm_slug, models.VirtualMachine):
         vm_slug = vm_slug.slug
@@ -86,9 +102,11 @@ def create_deployment(vm_slug, vagrant_name):
 
     t = tasks.run_on_vagr(
         vagr,
-        'create'
+        'create',
+        vm,
+        __install_deployment_callback
     )
-    vm.add_task(t)
+    vm.add_task(t, 'create')
 
     return _task_dict_success(t)
 
@@ -119,7 +137,7 @@ def run_on_existing(action, vm_obj, **kwargs):
     if action not in LEGAL_API_VM_ACTIONS:
         return "Action is not defined", 404
     t = _task_from_slug(action, vm_obj.slug, vm_obj, **kwargs)
-    vm_obj.add_task(t)
+    vm_obj.add_task(t, action)
     return _task_dict_success(t)
 
 

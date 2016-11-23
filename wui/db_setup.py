@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from . import models
 from os.path import join as _joinp
 from vmmanage import models as api_models
+from vmmanage import deploy_controller
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -61,6 +62,7 @@ def __create_test_data():
     problems = [
         api_models.VirtualMachine.objects.create(
             slug="WebTask",
+            name="Super Web Task",
             ip_addr="127.0.0.1",
             desc="A web task",
             category="Web",
@@ -68,6 +70,7 @@ def __create_test_data():
         ),
         api_models.VirtualMachine.objects.create(
             slug="PwnTask",
+            name="Hard PWN Task",
             ip_addr="127.0.0.1",
             desc="A pwn task",
             category="Pwn",
@@ -92,6 +95,11 @@ def __create_test_data():
             problem=problem,
             points=150
         )
+        problem.state_set.add(api_models.State(name="Installed"), bulk=False)
+
+    txt, res = deploy_controller.create_deployment("rugo_apache", "ubuntu_docker")
+    if res != 200:
+        log("Could not create deployment: " + txt)
 
 
 def log(msg, level=logging.WARN):

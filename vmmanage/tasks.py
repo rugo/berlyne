@@ -1,22 +1,27 @@
 from autotask.tasks import delayed_task
 from uptomate import Deployment
 from django.conf import settings
+from .models import State
 
 MSG_SUCCESS = "Finished"
 
 
 @delayed_task(ttl=settings.TASK_TTL)
-def run_on_vagr(vagr_depl, f, vm_db=None, **kwargs):
+def run_on_vagr(vagr_depl, f, vm_db=None, callback=None, **kwargs):
     getattr(Deployment.Vagrant, f)(vagr_depl, **kwargs)
     if vm_db is not None:
+        vm_db.state_set.add(State(name=vagr_depl.status().state), bulk=False)
         try:
             vm_db.ip_addr = vagr_depl.service_network_address()
-            vm_db.save()
+        # TODO: change to approp exception
         except BaseException:
             # this does not work all the time, e.g. when the command
             # was 'stop', however, that should never affect the
             # result of the actual command called
-            pass
+            vm_db.ip_addr = "Unknown"
+        vm_db.save()
+    if callback:
+        callback(vagr_depl, f, vm_db, **kwargs)
     return MSG_SUCCESS
 
 

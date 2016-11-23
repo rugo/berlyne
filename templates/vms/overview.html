@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Installed problems" %}{% endblock %}
+{% block content %}
+    <h1>Installed Problems</h1>
+    {% if errors %}
+        {% for error in errors %}
+            <div class="alert alert-danger">
+              {{ error }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% if success %}
+        {% for msg in success %}
+            <div class="alert alert-success">
+              {{ msg }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <hr>
+
+    <table class="table">
+            <thead>
+              <tr>
+                <th>{% trans 'Slug' %}</th>
+                <th>{% trans 'Name' %}</th>
+                <th>{% trans 'State' %}</th>
+                <th>{% trans 'Last Task' %}</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for problem in problems %}
+                      <tr {% if problem.task_set.latest.task.status == 4 %}class="danger"{% else %}class="success"{% endif %}>
+                        <td><a href="{% url "vmmanage_detail_problem" problem.slug %}">{{ problem.slug }}</a></td>
+                        <td>{{ problem.name }}</td>
+                        <td>{{ problem.state_set.last }}</td>
+                        <td>{{ problem.task_set.latest }}</td>
+                      </tr>
+            {% endfor %}
+    </table>
+
+{% endblock %}

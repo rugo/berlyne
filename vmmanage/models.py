@@ -1,7 +1,15 @@
-from django.db import models
-
+from django.db import models, transaction
 from autotask import models as task_models
 from uptomate import Deployment
+from random import randint, choice as rand_choice
+import string
+
+MIN_PORT = 1025
+MAX_PORT = 2**16-1
+
+RANDOM_FLAG_TEMPLATE = "flag{{{}}}"
+RANDOM_FLAG_CHARS = string.ascii_letters + string.digits
+RANDOM_FLAG_LEN = 24
 
 DEFAULT_TASK_NAME = "unnamed_task"
 TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
@@ -9,10 +17,9 @@ TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
 
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     ip_addr = models.CharField(max_length=45)
-    last_state = models.CharField(max_length=255)
 
     # Attrs used from config
     desc = models.TextField(max_length=1024)
@@ -31,17 +38,80 @@ class VirtualMachine(models.Model):
     def get_problem_config(self):
         return self.__get_problem_config()
 
-    def add_task(self, async_result):
-        self.task_set.add(Task.create(self, async_result), bulk=False)
+    def add_task(self, task, task_name=None):
+        self.task_set.add(Task.create(self, task, task_name), bulk=False)
+
+    def set_align_config(self, config):
+        config['ports'] = self.__assign_ports(config['ports'])
+        self.name = config['name']
+        self.desc = config['desc']
+        self.category = config['category']
+        config['flag'] = self.assign_flag(config.get('flag', ''))
+        self.save()
+        return config
+
+    def assign_flag(self, flag):
+        """
+        Assigns flag or creates one if flag is empty.
+        :return: flag that was set
+        """
+        if not flag:
+            flag = self.create_random_flag()
+        self.flag = flag
+        return flag
+
+    def create_random_flag(self):
+        return RANDOM_FLAG_TEMPLATE.format(
+            "".join(
+                [rand_choice(RANDOM_FLAG_CHARS) for _ in range(RANDOM_FLAG_LEN)]
+            )
+        )
+
+    def __assign_ports(self, ports):
+        for port in ports:
+            with transaction.atomic():
+                if not port['host']:
+                    port['host'] = Port.random_port()
+
+                Port.objects.create(
+                    guest_port=port['guest'],
+                    host_port=port['host'],
+                    description=port['desc'],
+                    vm=self
+                )
+        return ports
 
     def __str__(self):
         return self.slug
 
 
 class Port(models.Model):
-    number = models.IntegerField(unique=True)
+    host_port = models.IntegerField(unique=True)
+    guest_port = models.IntegerField()
     description = models.CharField(max_length=255)
     vm = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
+
+    @staticmethod
+    def random_port():
+        used = Port.objects.all().values_list('host_port', flat=True)
+
+        p = randint(MIN_PORT, MAX_PORT)
+        while p in used:
+            p = randint(MIN_PORT, MAX_PORT)
+        return p
+
+
+class State(models.Model):
+    name = models.CharField(max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
+    vm = models.ForeignKey(VirtualMachine)
+
+    class Meta:
+        get_latest_by = "created"
+        ordering = ["-created"]
+
+    def __str__(self):
+        return self.name
 
 
 class Task(models.Model):
@@ -52,13 +122,21 @@ class Task(models.Model):
     """
     virtual_machine = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
     task = models.ForeignKey(task_models.TaskQueue)
+    task_name = models.CharField(max_length=255)
     creation_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        get_latest_by = "creation_date"
+        ordering = ["-creation_date"]
 
     # Factory method
     @classmethod
-    def create(cls, virtual_machine, task):
+    def create(cls, virtual_machine, task, task_name=None):
+        if not task_name:
+            task_name = task.function_name
         return cls(virtual_machine=virtual_machine,
-                   task_id=task.pk)
+                   task_id=task.pk,
+                   task_name=task_name)
 
     @classmethod
     def create_and_launch(cls, virtual_machine, task, **task_kwargs):
@@ -71,11 +149,14 @@ class Task(models.Model):
         """
         return Task.create(virtual_machine, task(**task_kwargs))
 
+    def get_state_name(self):
+        return TASK_STATUS_NAMES[self.task.status]
+
     def to_dict(self, json_parsable=True):
         task_dict = {
             'task_name': self.task.function,
             'task_id': self.task.pk,
-            'state': TASK_STATUS_NAMES[self.task.status]
+            'state': self.get_state_name()
         }
 
         res = None
@@ -92,4 +173,4 @@ class Task(models.Model):
         return task_dict
 
     def __str__(self):
-        return "<Task: {}>".format(self.task_id)
+        return "{} [{}]".format(self.task_name, TASK_STATUS_NAMES[self.task.status])

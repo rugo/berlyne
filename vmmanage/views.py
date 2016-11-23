@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.http import HttpResponseNotAllowed
 from . import models
 from . import util
 from . import deploy_controller
@@ -128,4 +129,37 @@ def install_problem(request):
 
     return redirect(
         reverse('vmmanage_show_installable') + '?m=success'
+    )
+
+@permission_required("can_manage_vm")
+def problem_overview(request):
+    return render(
+        request,
+        "vms/overview.html",
+        {
+            "problems": models.VirtualMachine.objects.all(),
+        }
+    )
+
+
+@permission_required("can_manage_vm")
+def perform_action(request, problem_slug, action_name):
+    res = _run_task_on_existing_vm(action_name, problem_slug)
+    if res.status_code != 200:
+        return HttpResponseNotAllowed(res.content)
+    return redirect(
+        'vmmanage_detail_problem',
+        problem_slug=problem_slug
+    )
+
+@permission_required("can_manage_vm")
+def problem_detail(request, problem_slug):
+    return render(
+        request,
+        "vms/detail.html",
+        {
+            "problem": get_object_or_404(models.VirtualMachine,
+                                         slug=problem_slug),
+            "actions": deploy_controller.LEGAL_API_VM_ACTIONS
+        }
     )
