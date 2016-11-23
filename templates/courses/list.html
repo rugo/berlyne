@@ -39,7 +39,7 @@
                             <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                              {% if user|is_in_group:"teachers" %}
+                              {% if user|has_perm:"can_manage_course" %}
                                 <li><a href="{% url 'wui_course_edit' c.name %}">Edit</a></li>
                                 <li><a href="{% url 'wui_course_manage_problems' c.name %}">Manage Tasks</a></li>
                                 <li><a href="{% url 'wui_course_delete' c.name %}">Delete</a></li>
@@ -57,7 +57,7 @@
           </tbody>
       </table>
     </div>
-    {% if user|is_in_group:"teachers" %}
+    {% if user|has_perm:"can_manage_course" %}
         <a href="{% url 'wui_course_create' %}" class="btn btn-default">Create Course</a>
     {% endif %}
 {% endblock %}

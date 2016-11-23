@@ -20,7 +20,7 @@
                     <div class=".col-xs-4" style="float: left; width: 60%;">
                         <h3>
                             {{ entry.username }}
-                            {% if request.user|is_in_group:"teachers" %}
+                            {% if request.user|has_perm:"can_manage_course" %}
                                 {% if entry.last_name %}
                                     ({{ entry.last_name }})
                                 {% endif %}

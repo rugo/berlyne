@@ -15,7 +15,7 @@
                 <a href="{% url "wui_course_scoreboard" course.name %}">{% trans "Scoreboard" %}</a>
             </li>
         {% endif %}
-        {% if request.user|is_in_group:"teachers" %}
+        {% if request.user|has_perm:"can_manage_course" %}
             <li role="presentation" {% if page == "writeups" %} class="active"{% endif %}>
                 <a href="{% url "wui_course_writeups" course.name %}">{% trans "Write ups" %}</a>
             </li>
