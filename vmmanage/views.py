@@ -166,3 +166,25 @@ def problem_detail(request, problem_slug):
             "actions": deploy_controller.LEGAL_API_VM_ACTIONS
         }
     )
+
+
+@permission_required("can_manage_vm")
+def edit_problem(request, problem_slug):
+    problem = get_object_or_404(models.VirtualMachine, slug=problem_slug)
+
+    if request.POST:
+        form = forms.ProblemEditForm(request.POST,
+                                     instance=problem)
+        if form.is_valid():
+            form.save()
+    else:
+        form = forms.ProblemEditForm(instance=problem)
+
+    return render(
+        request,
+        "vms/edit.html",
+        {
+            "problem": problem,
+            "form": form
+        }
+    )

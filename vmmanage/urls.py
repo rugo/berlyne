@@ -25,12 +25,15 @@ urlpatterns = [
                 ),
             ),
     ])),
-    url(r"problem/", include([
-        url(r'install/$', views.show_installable_problems, name="vmmanage_show_installable"),
-        url(r'install_problem/$', views.install_problem, name="vmmanage_install_problem"),
-        url(r'problem/(?P<problem_slug>[\w-]+)/$', views.problem_detail, name="vmmanage_detail_problem"),
-        url(r'problem/(?P<problem_slug>[\w-]+)/action/(?P<action_name>[\w-]+)$',
-            views.perform_action, name="vmmanage_perform_action")
+    url(r"^problem/", include([
+        url(r'^install/$', views.show_installable_problems, name="vmmanage_show_installable"),
+        url(r'^install_problem/$', views.install_problem, name="vmmanage_install_problem"),
+        url(r'^problem/(?P<problem_slug>[\w-]+)/', include([
+            url(r'^$', views.problem_detail, name="vmmanage_detail_problem"),
+            url(r'^action/(?P<action_name>[\w-]+)$',
+                views.perform_action, name="vmmanage_perform_action"),
+            url(r'^edit/$', views.edit_problem, name="vmmanage_edit_problem"),
+        ])),
     ])),
     url(r'problems/$', views.problem_overview, name="vmmanage_show_problems"),
 ]
