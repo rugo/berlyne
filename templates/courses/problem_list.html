@@ -9,11 +9,11 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <a data-toggle="collapse" href="#collapse{{ problem.title }}">{{ problem.title }} [{{ problem.points }} {% trans "points" %}]
+                <a data-toggle="collapse" href="#collapse_{{ problem.slug }}">{{ problem.title }} [{{ problem.points }} {% trans "points" %}]
                     {% if problem.solved %} - <strong>{% trans "Solved!" %}</strong>{% endif %}</a>
               </h4>
             </div>
-            <div id="collapse{{ problem.title }}" class="panel-collapse {% if open_title != problem.title %}collapse{% endif %}">
+            <div id="collapse_{{ problem.slug }}" class="panel-collapse {% if open_slug != problem.slug %}collapse{% endif %}">
               <div class="panel-body">
                   <p>{% autoescape off %}{{ problem.desc }}{% endautoescape %}</p>
                   <small>- {% blocktrans with solved_count=problem.solved_count %} Solved {{ solved_count }} times - {% endblocktrans %}</small>
@@ -22,7 +22,7 @@
                   {% if problem.solved %}
                     {% trans "Solved!" %}
                   {% else %}
-                      <form method="POST" action="?title={{ problem.title }}">
+                      <form method="POST" action="?slug={{ problem.slug }}">
                           {% csrf_token %}
                           {{ problem.form }}
                           <input type="submit" class="btn btn-primary" value="{% trans 'Submit' %}">

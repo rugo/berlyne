@@ -163,7 +163,8 @@ def _course_problem_dict(course, user):
         problems = categories.get(category, [])
 
         problems.append({
-            'title': course_prob.problem.slug.capitalize(),
+            'title': course_prob.problem.name.capitalize(),
+            'slug': course_prob.problem.slug,
             'points': course_prob.points,
             'desc': _parse_problem_desc(course_prob.problem),
             'form': SubmissionForm(initial={
@@ -188,7 +189,7 @@ def _course_problem_dict(course, user):
 @login_required()
 def course_problems(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    open_title = request.GET.get('title', '')
+    open_slug = request.GET.get('slug', '')
     errors = []
     success = []
     if not course.has_user(request.user):
@@ -250,7 +251,7 @@ def course_problems(request, course_slug):
             'user_points': user_points,
             'page': 'problems',
             'course': course,
-            'open_title': open_title,
+            'open_slug': open_slug,
             'errors': errors,
             'success': success
         }
