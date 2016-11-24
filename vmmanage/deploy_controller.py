@@ -12,7 +12,7 @@ from . import models
 LEGAL_API_VM_ACTIONS = [
     'start',
     'stop',
-    # 'status',
+    'status',
     # 'address',
     'resume',
     'suspend',
@@ -80,7 +80,7 @@ def install_deployment(vagr_depl, vm):
     try:
         config = vm.set_align_config(vagr_depl.get_config())
     except KeyError as ex:
-        raise ValueError("Problem config ist missing '{}' field".format(str(ex)))
+        raise ValueError("Problem config is missing '{}' field".format(str(ex)))
 
     vagr_depl.set_config(config)
     with vagr_depl.open_file(FLAG_FILE_NAME) as f:

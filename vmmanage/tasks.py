@@ -9,7 +9,8 @@ MSG_SUCCESS = "Finished"
 
 @delayed_task(ttl=settings.TASK_TTL)
 def run_on_vagr(vagr_depl, f, vm_db=None, callback=None, **kwargs):
-    getattr(Deployment.Vagrant, f)(vagr_depl, **kwargs)
+    if f != "status":
+        getattr(Deployment.Vagrant, f)(vagr_depl, **kwargs)
     if vm_db is not None:
         vm_db.state_set.add(State(name=vagr_depl.status().state), bulk=False)
         try:
