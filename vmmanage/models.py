@@ -100,12 +100,21 @@ class Port(models.Model):
 
     @staticmethod
     def random_port():
+        """
+        Gets a free port num. This is not thread save and has to be used
+        within an atomic block together with the creation of the port obj.
+        :return:
+        """
         used = Port.objects.all().values_list('host_port', flat=True)
 
         p = randint(MIN_PORT, MAX_PORT)
         while p in used:
             p = randint(MIN_PORT, MAX_PORT)
         return p
+
+    def __str__(self):
+        return "{}->{}:{}".format(self.host_port, self.vm, self.guest_port)
+
 
 
 class State(models.Model):
