@@ -5,9 +5,13 @@
     <h1>{% trans "Write up" %}</h1>
     <h3> {{ sub.user }} {% if sub.user.last_name %}({{ sub.user.last_name }}){% endif %} {% trans "about" %} {{ sub.problem }}</h3>
     <p>
-        <pre>
-            {{ sub.writeup.strip }}
-        </pre>
+        {% if sub.writeup %}
+            <pre>
+                {{ sub.writeup.strip }}
+            </pre>
+        {% else %}
+            {% trans "The user submitted an empty writeup" %}
+        {% endif %}
     </p>
     <a href="javascript:history.back()" class="btn btn-info">{% trans "Back" %}</a>
 {% endblock %}
