@@ -448,7 +448,8 @@ def show_writeup(request, course_slug, problem_name, user_name):
         models.Submission,
         user__username=user_name,
         problem__problem__slug=problem_name,
-        problem__course__name=course_slug
+        problem__course__name=course_slug,
+        correct=True
     )
 
     return render(
