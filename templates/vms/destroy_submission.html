@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load vm_extra %}
+{% load i18n %}
+{% block title %}{{ problem.slug }} - {{ problem.name }}{% endblock %}
+{% block content %}
+    <h1>{{ problem.slug }} - {{ problem.name }}</h1>
+    <hr>
+    <div>
+        <div class="row">
+            <h3>{% trans "Do you really want to destroy this problem?" %}</h3>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="submit" value="{% trans 'Destroy' %}" class="btn btn-danger">
+            </form>
+        </div>
+        <div class="row">
+            {% trans "(Destroying might take a while)" %}
+        </div>
+
+        <div class="row" style="margin-top: 20px">
+            {% if problem.course_set.exists %}
+                {% trans "<strong>This will delete all data connected to the problem, including writeups etc.</strong>" %}
+                <br />
+                {% trans "Problem is associated with the course(s):" %}
+                <ul style="list-style-type: none">
+                    {% for c in problem.course_set.all %}
+                        <li>{{ c.name }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <h3>{% trans "Problem is not associated with any course" %}</h3>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

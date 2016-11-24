@@ -99,9 +99,9 @@ def show_installable_problems(request):
     if not problems:
         msgs.append(_("No problems are available for installation"))
 
-    msg = request.GET.get("m", "")
-    if msg:
-        msgs.append(_INSTALL_MSGS[msg])
+    _msg = request.GET.get("m", "")
+    if _msg:
+        msgs.append(_INSTALL_MSGS[_msg])
 
     return render(
         request,
@@ -112,6 +112,21 @@ def show_installable_problems(request):
                 initial={'vagrant_file': settings.VAGR_DEFAULT_VAGR_FILE}
             ),
             "errors": msgs,
+        }
+    )
+
+
+@permission_required("can_manage_vm")
+def problem_destroy(request, problem_slug):
+    problem = get_object_or_404(models.VirtualMachine, slug=problem_slug)
+    if request.POST:
+        deploy_controller.destroy_deployment(problem)
+        return redirect('vmmanage_show_problems')
+    return render(
+        request,
+        "vms/destroy_submission.html",
+        {
+            "problem": problem,
         }
     )
 
@@ -154,6 +169,7 @@ def perform_action(request, problem_slug, action_name):
         'vmmanage_detail_problem',
         problem_slug=problem_slug
     )
+
 
 @permission_required("can_manage_vm")
 def problem_detail(request, problem_slug):

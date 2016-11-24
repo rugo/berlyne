@@ -28,6 +28,7 @@
                                  <a href="{% url 'vmmanage_perform_action' problem.slug action %}" class="btn btn-primary">{{ action|capfirst }}</a>
                               </div>
                           {% endfor %}
+                          <a href="{% url 'vmmanage_problem_destroy' problem.slug %}" class="btn btn-danger">{% trans "Destroy" %}</a>
                   </div>
               </div>
             </div>

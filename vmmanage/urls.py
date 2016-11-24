@@ -32,6 +32,7 @@ urlpatterns = [
             url(r'^$', views.problem_detail, name="vmmanage_detail_problem"),
             url(r'^action/(?P<action_name>[\w-]+)$',
                 views.perform_action, name="vmmanage_perform_action"),
+            url(r'destroy/$', views.problem_destroy, name='vmmanage_problem_destroy'),
             url(r'^edit/$', views.edit_problem, name="vmmanage_edit_problem"),
         ])),
     ])),
