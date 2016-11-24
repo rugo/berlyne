@@ -61,12 +61,12 @@ class VirtualMachine(models.Model):
         :return: flag that was set
         """
         if not flag:
-            flag = self.create_random_flag()
+            flag = VirtualMachine.create_random_flag()
         self.flag = flag
         return flag
 
     @staticmethod
-    def create_random_flag(self):
+    def create_random_flag():
         return RANDOM_FLAG_TEMPLATE.format(
             "".join(
                 [rand_choice(RANDOM_FLAG_CHARS) for _ in range(RANDOM_FLAG_LEN)]
