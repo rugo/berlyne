@@ -26,6 +26,7 @@ class VirtualMachine(models.Model):
     desc = models.TextField(_("description"), max_length=1024)
     category = models.CharField(_("Category"), max_length=255)
     flag = models.CharField(max_length=255)
+    default_points = models.PositiveSmallIntegerField(default=0)
 
     # Stores config of problem running on this machine
     __vagr_config = None
@@ -47,6 +48,7 @@ class VirtualMachine(models.Model):
         self.name = config['name']
         self.desc = config['desc']
         self.category = config['category']
+        self.default_points = config['points']
         config['flag'] = self.assign_flag(config.get('flag', ''))
         for t in config['tags']:
             self.tag_set.add(Tag.objects.update_or_create(name=t)[0])

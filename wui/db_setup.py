@@ -66,7 +66,8 @@ def __create_test_data():
             ip_addr="127.0.0.1",
             desc="A web task",
             category="Web",
-            flag="flag{hoho}"
+            flag="flag{hoho}",
+            default_points=100
         ),
         api_models.VirtualMachine.objects.create(
             slug="PwnTask",
@@ -74,7 +75,8 @@ def __create_test_data():
             ip_addr="127.0.0.1",
             desc="A pwn task",
             category="Pwn",
-            flag="flag{hoho}"
+            flag="flag{hoho}",
+            default_points=200
         )
     ]
 

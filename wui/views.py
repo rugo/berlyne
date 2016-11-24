@@ -300,9 +300,15 @@ def course_manage_problems(request, course_slug):
     if request.POST:
         form = AddProbForm(request.POST, instance=course)
         if form.is_valid():
-            for problem in form.cleaned_data['problems']:
+            new_problems = form.cleaned_data['problems']
+
+            models.CourseProblems.objects.filter(
+                course=course
+            ).exclude(problem__in=new_problems).delete()
+
+            for problem in new_problems:
                 models.CourseProblems.objects.update_or_create(
-                    course=course, problem=problem, defaults={'points': 0}
+                    course=course, problem=problem, defaults={'points': problem.default_points}
                 )
             return redirect(reverse('wui_points_to_problems',
                                     kwargs={'course_slug': course_slug}))
@@ -320,19 +326,19 @@ def course_manage_problems(request, course_slug):
 @permission_required('can_manage_course')
 def course_manage_points(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    problems = course.problems.all()
+    problems = models.CourseProblems.objects.filter(course=course)
     cp_forms = []
 
     if request.POST:
         for prob in problems:
-            form = PointToProbForm(request.POST, prefix=prob.slug)
+            form = PointToProbForm(request.POST, prefix=prob.problem.slug)
             cp_forms.append(form)
             if form.is_valid():
                 models.CourseProblems.objects.filter(
                     course=course,
-                    problem=prob
+                    problem=prob.problem
                 ).update(
-                    points = form.cleaned_data['points']
+                    points=form.cleaned_data['points']
                 )
             else:
                 break
@@ -340,7 +346,12 @@ def course_manage_points(request, course_slug):
             return redirect(reverse('wui_courses'))
     else:
         for cp in problems:
-            cp_forms.append(PointToProbForm(prefix=cp.slug))
+            cp_forms.append(
+                PointToProbForm(
+                    prefix=cp.problem.slug,
+                    initial={'points': cp.points}
+                )
+            )
 
     return render(
         request,
