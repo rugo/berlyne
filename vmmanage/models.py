@@ -65,6 +65,7 @@ class VirtualMachine(models.Model):
         self.flag = flag
         return flag
 
+    @staticmethod
     def create_random_flag(self):
         return RANDOM_FLAG_TEMPLATE.format(
             "".join(
