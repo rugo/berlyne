@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
+from django.conf import settings
 from . import models
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
@@ -14,6 +15,7 @@ from django.db.models import (
     IntegerField,
     Value
 )
+from uptomate.Provider import LOCALHOST
 
 MESSAGES = {
     '': None,
@@ -144,6 +146,15 @@ def course_leave(request, course_slug):
     return redirect(reverse('wui_courses') + "?m=left")
 
 
+def _parse_problem_desc(problem):
+    ctx = {
+        'HOST': settings.DOMAIN if problem.ip_addr == LOCALHOST else problem.ip_addr
+    }
+    for port in problem.port_set.all():
+        ctx['PORT_{}'.format(port.guest_port)] = port.host_port
+    return problem.desc.format(**ctx)
+
+
 def _course_problem_dict(course, user):
     categories = {}
     total_points = 0
@@ -154,7 +165,7 @@ def _course_problem_dict(course, user):
         problems.append({
             'title': course_prob.problem.slug.capitalize(),
             'points': course_prob.points,
-            'desc': course_prob.problem.desc,
+            'desc': _parse_problem_desc(course_prob.problem),
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
             ),
