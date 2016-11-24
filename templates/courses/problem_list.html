@@ -21,6 +21,9 @@
               <div class="panel-footer">
                   {% if problem.solved %}
                     {% trans "Solved!" %}
+                    {% if course.writeups %}
+                        <small><a href="{% url 'wui_course_problem_writeup' course.name problem.slug %}">edit writeup</a></small>
+                    {% endif %}
                   {% else %}
                       <form method="POST" action="?slug={{ problem.slug }}">
                           {% csrf_token %}

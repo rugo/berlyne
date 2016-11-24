@@ -386,7 +386,7 @@ def writeup(request, course_slug, problem_slug):
                     kwargs={
                         'course_slug': course.name
                     }
-                ) + '?title=' + problem_slug
+                ) + '?slug=' + problem_slug
             )
 
     return render(
