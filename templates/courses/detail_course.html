@@ -3,8 +3,17 @@
 {% block details %}
     <h1>{{ course.name }}</h1>
     <div class="content-left">
-        <strong>{% trans "Points needed" %}:</strong> {{ course.point_threshold }}
+        <strong>{% trans "Points needed to pass" %}:</strong> {{ course.point_threshold }}
         <br />
-        {{ course.description }}
+        <strong>{% trans "Begin" %}:</strong> {{ course.start_time|date:"d M y" }}, {{ course.start_time|time:"H:i" }}
+        <br />
+        <strong>{% trans "End" %}:</strong> {{ course.deadline|date:"d M y" }}, {{ course.deadline|time:"H:i" }}
+        <br />
+        <strong>{% trans "Description" %}:</strong>
+        <br />
+        <p style="margin-top: 10px">
+            {{ course.description }}
+        </p>
+
     </div>
 {% endblock %}

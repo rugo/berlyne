@@ -2,7 +2,7 @@ from django.db import models
 import vmmanage.models
 from django.contrib.auth import models as auth_models
 from django.utils.translation import ugettext_lazy as _
-
+from django.utils import timezone
 
 class Course(models.Model):
     name = models.SlugField(_('name'), unique=True)
@@ -31,6 +31,14 @@ class Course(models.Model):
                                       through='CourseProblems')
 
     writeups = models.BooleanField(_("activate write ups"))
+
+    @property
+    def has_ended(self):
+        return self.deadline < timezone.now()
+
+    @property
+    def has_begun(self):
+        return self.start_time < timezone.now()
 
     def __str__(self):
         return "{} ({})".format(

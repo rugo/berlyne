@@ -195,6 +195,10 @@ def _course_problem_dict(course, user):
 @login_required()
 def course_problems(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
+    if not course.has_begun and course.teacher != request.user:
+        return redirect(
+            reverse('wui_course_show', kwargs={'course_slug': course_slug})
+        )
     open_slug = request.GET.get('slug', '')
     errors = []
     success = []
@@ -202,40 +206,43 @@ def course_problems(request, course_slug):
         return redirect(reverse('wui_courses') + "?m=join_first")
 
     if request.POST:
-        form = SubmissionForm(request.POST)
-        if form.is_valid():
-            flag_correct, course_problem =\
-                models.CourseProblems.check_problem_flag(
-                    course,
-                    form.cleaned_data['problem_slug'],
-                    form.cleaned_data['flag']
-                )
-            try:
-                models.Submission.objects.create(
-                    flag=form.cleaned_data['flag'],
-                    problem=course_problem,
-                    correct=flag_correct,
-                    user=request.user
-                )
-                if flag_correct and course.writeups:
-                    return redirect(
-                        reverse(
-                            'wui_course_problem_writeup',
-                            kwargs={
-                                'course_slug': course_slug,
-                                'problem_slug': course_problem.problem.slug
-                            }
-                        )
-                    )
-            except IntegrityError:
-                errors.append(_("You already tried that..."))
-
-            if flag_correct:
-                success.append(_("Flag was correct!"))
-            else:
-                errors.append(_("Flag was incorrect!"))
+        if course.has_ended:
+            errors.append(_("The course is over."))
         else:
-            errors.append(_("Form was invalid"))
+            form = SubmissionForm(request.POST)
+            if form.is_valid():
+                flag_correct, course_problem =\
+                    models.CourseProblems.check_problem_flag(
+                        course,
+                        form.cleaned_data['problem_slug'],
+                        form.cleaned_data['flag']
+                    )
+                try:
+                    models.Submission.objects.create(
+                        flag=form.cleaned_data['flag'],
+                        problem=course_problem,
+                        correct=flag_correct,
+                        user=request.user
+                    )
+                    if flag_correct and course.writeups:
+                        return redirect(
+                            reverse(
+                                'wui_course_problem_writeup',
+                                kwargs={
+                                    'course_slug': course_slug,
+                                    'problem_slug': course_problem.problem.slug
+                                }
+                            )
+                        )
+                except IntegrityError:
+                    errors.append(_("You already tried that..."))
+
+                if flag_correct:
+                    success.append(_("Flag was correct!"))
+                else:
+                    errors.append(_("Flag was incorrect!"))
+            else:
+                errors.append(_("Form was invalid"))
 
     categories, total_points = _course_problem_dict(course, request.user)
     user_points = sum(
@@ -370,6 +377,8 @@ def course_manage_points(request, course_slug):
 @login_required()
 def writeup(request, course_slug, problem_slug):
     course = get_object_or_404(models.Course, name=course_slug)
+    if course.has_ended or not course.has_begun:
+        return redirect('wui_course_show', kwargs={"course_slug": course_slug})
     submission = get_object_or_404(
         models.Submission,
         problem__problem__slug=problem_slug,
@@ -378,7 +387,7 @@ def writeup(request, course_slug, problem_slug):
     )
 
     if not course.writeups:
-        return redirect(reverse('wui_courses'))
+        return redirect('wui_course_show', kwargs={"course_slug": course_slug})
 
     form = WriteupForm(instance=submission)
 
