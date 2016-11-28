@@ -22,6 +22,10 @@ class Course(models.Model):
     # Points needed to pass
     point_threshold = models.IntegerField(_('point threshold'), )
 
+    # Date time until when submission is open
+    start_time = models.DateTimeField(_("start time"))
+    deadline = models.DateTimeField(_("submission deadline"))
+
     # instances of problems (VMs)
     problems = models.ManyToManyField(vmmanage.models.VirtualMachine,
                                       through='CourseProblems')

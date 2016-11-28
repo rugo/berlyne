@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.conf import settings
 from . import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
 from .forms import *
@@ -60,7 +61,12 @@ def course_edit(request, course_slug=None):
                 instance=get_object_or_404(models.Course, name=course_slug)
             )
         else:
-            form = CourseForm()
+            form = CourseForm(
+                initial={
+                    'start_time': timezone.now(),
+                    'deadline': timezone.now() + timezone.timedelta(weeks=1)
+                }
+            )
     return render(request, 'generic/model_form.html', {'headline': _('Course'),
                                                        'form': form})
 

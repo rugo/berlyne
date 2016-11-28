@@ -30,6 +30,8 @@ class CourseForm(ModelForm):
             'description',
             'show_scoreboard',
             'writeups',
+            'start_time',
+            'deadline',
             'password',
             'point_threshold',
         ]
