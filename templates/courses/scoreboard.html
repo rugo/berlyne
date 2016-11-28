@@ -28,7 +28,9 @@
                         </h3>
                     </div>
                     <div class=".col-xs-4" style="float: right; width: 20%;">
-                        <h3>{{ entry.point_sum }}</h3>
+                        <h3 style="color: {% if entry.point_sum >= course.point_threshold %}green{% else %}red{% endif %}">
+                            {{ entry.point_sum }}
+                        </h3>
                     </div>
                 </div>
         <hr />
