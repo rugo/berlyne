@@ -22,11 +22,11 @@
                 <li class="list-group-item"><strong>{% trans 'Flag' %}</strong>: {{ problem.flag }}</li>
               </ul>
                 <p>{% trans 'Manually perform tasks on the problem:' %}</p>
-                  <div class="row">
+                  <div>
                           {% for action in actions %}
-                              <div class="col-md-1 col-centered">
+                              <span>
                                  <a href="{% url 'vmmanage_perform_action' problem.slug action %}" class="btn btn-primary">{{ action|capfirst }}</a>
-                              </div>
+                              </span>
                           {% endfor %}
                           <a href="{% url 'vmmanage_problem_destroy' problem.slug %}" class="btn btn-danger">{% trans "Destroy" %}</a>
                   </div>
