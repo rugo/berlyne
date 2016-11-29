@@ -7,6 +7,7 @@ from vmmanage import deploy_controller
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
 from django.conf import settings
+from django.utils import timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,9 @@ def __create_test_data():
         show_scoreboard=True,
         teacher=su,
         point_threshold=300,
-        writeups=True
+        writeups=True,
+        start_time=timezone.now(),
+        deadline=timezone.now() + timezone.timedelta(weeks=1)
     )
 
     course.participants.add(u, su)
