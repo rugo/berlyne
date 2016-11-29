@@ -88,7 +88,7 @@ class VirtualMachine(models.Model):
         return ports
 
     def __str__(self):
-        return self.slug
+        return "[{}] - {}".format(self.slug, self.name)
 
 
 class Tag(models.Model):
