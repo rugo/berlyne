@@ -292,6 +292,8 @@ def course_scoreboard(request, course_slug):
         )
     ).annotate(
         newest_submission=Max('submission__creation_time')
+    ).exclude(
+        username__exact=course.teacher.username
     ).order_by(
         '-point_sum',
         'newest_submission'
