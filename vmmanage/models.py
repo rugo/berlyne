@@ -116,7 +116,7 @@ class Port(models.Model):
         return p
 
     def __str__(self):
-        return "{}->{}:{}".format(self.host_port, self.vm, self.guest_port)
+        return "{}->{}:{}".format(self.host_port, self.vm.slug, self.guest_port)
 
 
 
