@@ -15,6 +15,10 @@ RANDOM_FLAG_LEN = 24
 DEFAULT_TASK_NAME = "unnamed_task"
 TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
 
+VAGRANT_RUNNING_STATES = ('running',)
+VAGRANT_STOPPED_STATES = ('stopped', "not_created")
+VAGRANT_STATES = VAGRANT_RUNNING_STATES + VAGRANT_STOPPED_STATES
+
 
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
@@ -54,6 +58,17 @@ class VirtualMachine(models.Model):
             self.tag_set.add(Tag.objects.update_or_create(name=t)[0])
         self.save()
         return config
+
+    def has_task_in_queue(self, task_name):
+        return self.task_set.filter(
+                task_status__in=[task_models.WAITING, task_models.RUNNING]
+        ).filter(
+            task_name=task_name
+        ).exists()
+
+    @property
+    def is_running(self):
+        return self.state_set.last().name in VAGRANT_RUNNING_STATES
 
     def assign_flag(self, flag):
         """
