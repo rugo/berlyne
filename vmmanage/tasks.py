@@ -11,6 +11,8 @@ MSG_SUCCESS = "Finished"
 def run_on_vagr(vagr_depl, f, vm_db=None, callback=None, **kwargs):
     if f != "status":
         getattr(Deployment.Vagrant, f)(vagr_depl, **kwargs)
+    if callback:
+        callback(vagr_depl, f, vm_db, **kwargs)
     if vm_db is not None:
         vm_db.state_set.add(State(name=vagr_depl.status().state), bulk=False)
         try:
@@ -21,8 +23,6 @@ def run_on_vagr(vagr_depl, f, vm_db=None, callback=None, **kwargs):
             # result of the actual command called
             vm_db.ip_addr = "Unknown"
         vm_db.save()
-    if callback:
-        callback(vagr_depl, f, vm_db, **kwargs)
     return MSG_SUCCESS
 
 
