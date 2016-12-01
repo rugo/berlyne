@@ -35,6 +35,9 @@ class VirtualMachine(models.Model):
     # Stores config of problem running on this machine
     __vagr_config = None
 
+    class Meta:
+        ordering = ("slug", )
+
     def __get_problem_config(self):
         if not self.__vagr_config:
             vagr = Deployment.Vagrant(self.slug)
