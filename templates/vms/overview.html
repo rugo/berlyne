@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load vm_extra %}
 {% block title %}{% trans "Installed problems" %}{% endblock %}
 {% block content %}
     <h1>Installed Problems</h1>
@@ -30,11 +31,11 @@
             </thead>
             <tbody>
             {% for problem in problems %}
-                      <tr {% if problem.task_set.latest.task.status == 4 %}class="danger"{% else %}class="success"{% endif %}>
+                      <tr>
                         <td><a href="{% url "vmmanage_detail_problem" problem.slug %}">{{ problem.slug }}</a></td>
                         <td>{{ problem.name }}</td>
-                        <td>{{ problem.state_set.latest }}</td>
-                        <td>{{ problem.task_set.latest }}</td>
+                        <td class="{{ problem.state_set.latest.name|state_css_class }}">{{ problem.state_set.latest }}</td>
+                        <td class="{{ problem.task_set.latest.task.status|task_css_class }}">{{ problem.task_set.latest }}</td>
                       </tr>
             {% endfor %}
     </table>

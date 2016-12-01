@@ -5,6 +5,9 @@ from autotask.models import (
     ERROR,
     DONE
 )
+
+from vmmanage.models import VAGRANT_RUNNING_STATES
+
 register = template.Library()
 
 TASK_CSS_CLASSES = {
@@ -18,6 +21,10 @@ TASK_CSS_CLASSES = {
 @register.filter()
 def task_css_class(task_state):
     return TASK_CSS_CLASSES.get(task_state, "")
+
+@register.filter()
+def state_css_class(vm_state):
+    return "success" if vm_state in VAGRANT_RUNNING_STATES else "danger"
 
 
 @register.filter()
