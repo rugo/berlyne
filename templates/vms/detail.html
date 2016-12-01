@@ -17,7 +17,7 @@
                 <li class="list-group-item"><strong>{% trans 'IP-Address' %}</strong>: {{ problem.ip_addr }}</li>
                 <li class="list-group-item"><strong>{% trans 'Ports' %}</strong>: {% for port in problem.port_set.all %}{{ port }}{% endfor %}
                 <li class="list-group-item"><strong>{% trans 'Category' %}</strong>: {{ problem.category }}</li>
-                <li class="list-group-item"><strong>{% trans 'Tags' %}</strong>: {% for t in problem.tag_set.all %}{{ t.name }} {% endfor %}</li>
+                <li class="list-group-item"><strong>{% trans 'Tags' %}</strong>: {{ problem.tag_set.all|joinby:", "}}</li>
 
                 <li class="list-group-item"><strong>{% trans 'Flag' %}</strong>: {{ problem.flag }}</li>
               </ul>

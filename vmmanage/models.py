@@ -110,6 +110,10 @@ class Tag(models.Model):
     name = models.SlugField(_("name"), unique=True)
     vm = models.ManyToManyField(VirtualMachine)
 
+    def __str__(self):
+        return self.name
+
+
 class Port(models.Model):
     host_port = models.IntegerField(_("host port"), unique=True)
     guest_port = models.IntegerField(_("guest port"), )
