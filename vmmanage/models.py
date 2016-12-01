@@ -105,7 +105,7 @@ class VirtualMachine(models.Model):
         return ports
 
     def __str__(self):
-        return "[{}] - {}".format(self.slug, self.name)
+        return "[{}] - {} ({})".format(self.slug, self.name, self.category)
 
 
 class Tag(models.Model):
