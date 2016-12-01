@@ -91,9 +91,10 @@ class VirtualMachine(models.Model):
     def __assign_ports(self, ports):
         for port in ports:
             with transaction.atomic():
+                print(port['host'])
                 if not port['host']:
                     port['host'] = Port.random_port()
-
+                print(port['host'])
                 Port.objects.create(
                     guest_port=port['guest'],
                     host_port=port['host'],
