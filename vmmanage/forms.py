@@ -4,7 +4,7 @@ from . import models
 
 
 class VagrantFilesForm(Form):
-    vagrant_file = ChoiceField(label="Deployment evnironment",
+    vagrant_file = ChoiceField(label="Deployment",
         choices=[(x, x)for x in deploy_controller.get_avail_vagrant_files()],
     )
 
