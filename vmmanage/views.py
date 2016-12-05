@@ -26,11 +26,6 @@ def _run_task_on_existing_vm(action, vm_slug, **kwargs):
 
 
 @permission_required('can_manage_vm')
-def vm_start_provider(request, vm_slug, provider):
-    return _run_task_on_existing_vm('start', vm_slug, provider=provider)
-
-
-@permission_required('can_manage_vm')
 def vm_action(request, vm_slug, action_name):
     return _run_task_on_existing_vm(action_name, vm_slug)
 
@@ -87,7 +82,7 @@ def task_state(request, task_id):
     res = task.to_dict()
 
     return util.http_json_response(
-        res, 200
+        res, deploy_controller.HTTP_OK
     )
 
 
@@ -139,9 +134,9 @@ def install_problem(request):
     if form.is_valid():
         vagr_name = form.cleaned_data['vagrant_file']
         problem_name = request.POST['problem']
-        if models.VirtualMachine.objects.filter(slug=problem_name).exists():
+        reason, code = deploy_controller.create_deployment(problem_name, vagr_name)
+        if code == deploy_controller.HTTP_CONFLICT:
             return redirect(reverse('vmmanage_show_installable') + '?m=exists')
-        deploy_controller.create_deployment(problem_name, vagr_name)
     else:
         return redirect(reverse('vmmanage_show_installable') + '?m=formerror')
 
@@ -163,7 +158,7 @@ def problem_overview(request):
 @permission_required("can_manage_vm")
 def perform_action(request, problem_slug, action_name):
     res = _run_task_on_existing_vm(action_name, problem_slug)
-    if res.status_code != 200:
+    if res.status_code != deploy_controller.HTTP_OK:
         return HttpResponseNotAllowed(res.content)
     return redirect(
         'vmmanage_detail_problem',

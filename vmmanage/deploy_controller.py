@@ -2,8 +2,16 @@ from django.conf import settings
 from os import path
 from django.db import IntegrityError
 from glob import glob
+from http.client import (
+    OK as HTTP_OK,
+    CONFLICT as HTTP_CONFLICT
+)
 
-from uptomate.Deployment import Vagrant
+from uptomate.Deployment import (
+    Vagrant,
+    INSTANCE_DIR_NAME,
+    INSTALLED_MARKER_FILE
+)
 from uptomate import Deployment, Provider
 from . import tasks
 from . import models
@@ -36,40 +44,13 @@ def get_avail_vagrant_files():
 def _task_dict_success(task):
     return {
         'task_id': task.pk
-    }, 200
+    }, HTTP_OK
 
 
-def _vagr_factory(vm_slug, vagrant_name=None, provider=None, file_locs=None):
-    """
-    Uptomate vagrant factory method
-    :param vm_slug: Slug to be used in the fs
-    :param vagrant_name: File name of Vagrantfile to link to
-    :param provider: Either name of a legit provider or a provider object
-    :param file_locs: Location of the files to copy to deployment folder
-    """
-    if file_locs is None:
-        file_locs = []
-    if not file_locs:
-        file_locs = [
-            path.join(
-                settings.DEPLOYMENT_SRC_BASEDIR,
-                vm_slug,
-                def_file_name) for def_file_name in Deployment.DEFAULT_FILE_NAMES
-        ]
-
-    if isinstance(provider, str):
-        try:
-            provider = Provider.ALLOWED_PROVIDERS[provider]
-        except KeyError:
-            raise ValueError("Provider {} not known".format(provider))
-
+def _vagr_factory(vm_slug):
     return Vagrant(
         vm_slug,
-        vagrant_name=vagrant_name,
-        provider=provider,
         deployment_path=settings.VAGR_DEPLOYMENT_PATH,
-        vagrant_path=settings.VAGR_VAGRANT_PATH,
-        file_locs=file_locs
     )
 
 
@@ -82,10 +63,10 @@ def install_deployment(vagr_depl, vm):
     except KeyError as ex:
         raise ValueError("Problem config is missing '{}' field".format(str(ex)))
 
-    vagr_depl.set_config(config)
-    with vagr_depl.open_file(FLAG_FILE_NAME) as f:
-        f.write(config['flag'])
+    vagr_depl.set_ports(config['ports'])
 
+    with vagr_depl.open_content_file(FLAG_FILE_NAME) as f:
+        f.write(config['flag'])
 
 
 def __install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
@@ -93,26 +74,28 @@ def __install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
 
 
 def create_deployment(vm_slug, vagrant_name):
+
     if isinstance(vm_slug, models.VirtualMachine):
         vm_slug = vm_slug.slug
 
-    vagr = _vagr_factory(vm_slug, vagrant_name)
-    if vagr.exists:
-        return "VM with that name already exists in fs", 419
+    vagr = _vagr_factory(vm_slug)
+    if vagr.installed:
+        return "VM with that name already exists in fs", HTTP_CONFLICT
 
     try:
         vm = models.VirtualMachine.objects.create(slug=vm_slug)
     except IntegrityError:
-        return "VM exists already in db", 419
+        return "VM exists already in db", HTTP_CONFLICT
 
     t = tasks.run_on_vagr(
         vagr,
         'create',
         vm,
-        __install_deployment_callback
+        __install_deployment_callback,
+        vagrant_file_path=path.join(settings.VAGR_VAGRANT_PATH, vagrant_name)
     )
-    vm.add_task(t, 'create')
 
+    vm.add_task(t, 'create')
     return _task_dict_success(t)
 
 
@@ -123,7 +106,7 @@ def destroy_deployment(vm):
 
 def destroy_deployment_db(vm):
     tasks.destroy_vm_db(vm)
-    return "Deleted from db", 200
+    return "Deleted from db", HTTP_OK
 
 
 def destroy_deployment_fs(vm_slug):
@@ -134,8 +117,8 @@ def destroy_deployment_fs(vm_slug):
 
 
 def _task_from_slug(action, vm_slug, vm_db=None, **kwargs):
-    vagr = _vagr_factory(vm_slug, **kwargs)
-    return tasks.run_on_vagr(vagr, action, vm_db)
+    vagr = _vagr_factory(vm_slug)
+    return tasks.run_on_vagr(vagr, action, vm_db, **kwargs)
 
 
 def run_on_existing(action, vm_obj, **kwargs):
@@ -150,10 +133,13 @@ def find_installable_problems():
     problems = []
     for task_path in glob(
             path.join(
-                settings.DEPLOYMENT_SRC_BASEDIR,
+                settings.VAGR_DEPLOYMENT_PATH,
                 "*",
                 Deployment.CONFIG_FILE_NAME
             )
     ):
-        problems.append(path.split(path.dirname(task_path))[-1])
+        if not path.exists(
+                path.join(task_path, INSTANCE_DIR_NAME, INSTALLED_MARKER_FILE)
+        ):
+            problems.append(path.split(path.dirname(task_path))[-1])
     return problems

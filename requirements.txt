@@ -1,3 +1,4 @@
 django
 autotask
 python-vagrant
+git+https://gitlab.com/rugo/uptomate-re.git

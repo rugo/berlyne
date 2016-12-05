@@ -102,7 +102,7 @@ def __create_test_data():
         )
         problem.state_set.add(api_models.State(name="Installed"), bulk=False)
 
-    txt, res = deploy_controller.create_deployment("rugo_apache", "ubuntu_docker")
+    txt, res = deploy_controller.create_deployment("tutorial", "ubuntu_docker")
     if res != 200:
         log("Could not create deployment: " + txt)
 
