@@ -1,7 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.conf import settings
+from django.http import HttpResponse
+from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from . import models
+from vmmanage.models import Download
+from os import path
+from wsgiref.util import FileWrapper
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse
@@ -18,6 +23,8 @@ from django.db.models import (
 )
 from uptomate.Provider import LOCALHOST
 
+
+DOWNLOAD_FNAME_TEMLATE = "{problem_slug}_{download_pk}_{filename}"
 MESSAGES = {
     '': None,
     'joined': _("You joined the course"),
@@ -158,6 +165,11 @@ def _parse_problem_desc(problem):
     }
     for port in problem.port_set.all():
         ctx['PORT_{}'.format(port.guest_port)] = port.host_port
+    for download in problem.download_set.all():
+        ctx['DL_{}'.format(download.slug)] = reverse(
+            'wui_download_file',
+            kwargs={'download_id': download.pk}
+        )
     return problem.desc.format(**ctx)
 
 
@@ -476,6 +488,38 @@ def show_writeup(request, course_slug, problem_name, user_name):
             "sub": sub
         }
     )
+
+
+def _download_wrapped_file(download):
+    download_path = download.abspath
+    if not path.exists(download_path):
+        return HttpResponse("Download not found", status=HTTP_NOT_FOUND)
+    wrapper = FileWrapper(open(download_path))
+    response = HttpResponse(wrapper, content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(
+        DOWNLOAD_FNAME_TEMLATE.format(
+            filename=path.basename(download_path),
+            download_pk=download.pk,
+            problem_slug=download.problem.slug
+        )
+    )
+    response['Content-Length'] = path.getsize(download_path)
+    return response
+
+
+@login_required()
+def download_file(request, download_id):
+    download = get_object_or_404(Download, pk=download_id)
+
+    if download.problem.course_set.filter(
+            participants__pk=request.user.pk
+    ).exists():
+            return _download_wrapped_file(download)
+
+    return HttpResponse(
+        "Not Found", status=HTTP_NOT_FOUND
+    )
+
 
 
 def index(request):

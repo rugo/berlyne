@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.conf import settings
 from autotask import models as task_models
 from uptomate import Deployment
 from random import randint, choice as rand_choice
@@ -34,14 +35,22 @@ class VirtualMachine(models.Model):
 
     # Stores config of problem running on this machine
     __vagr_config = None
+    __vagr_instance = None
 
     class Meta:
         ordering = ("slug", )
 
+    def get_vagrant(self):
+        if not self.__vagr_instance:
+            self.__vagr_instance = Deployment.Vagrant(
+                self.slug,
+                deployment_path=settings.VAGR_DEPLOYMENT_PATH
+            )
+        return self.__vagr_instance
+
     def __get_problem_config(self):
         if not self.__vagr_config:
-            vagr = Deployment.Vagrant(self.slug)
-            self.__vagr_config = vagr.get_config()
+            self.__vagr_config = self.get_vagrant().get_config()
         return self.__vagr_config.copy()
 
     def get_problem_config(self):
@@ -57,9 +66,23 @@ class VirtualMachine(models.Model):
         self.category = config['category']
         self.default_points = config['points']
         config['flag'] = self.assign_flag(config.get('flag', ''))
+
+        self.save()
+
         for t in config['tags']:
             self.tag_set.add(Tag.objects.update_or_create(name=t)[0])
-        self.save()
+
+        if 'downloads' in config:
+            for slug, d in config['downloads'].items():
+                self.download_set.add(
+                    Download.objects.create(
+                        slug=slug,
+                        problem=self,
+                        path=self.get_vagrant().normalize_content_path(
+                            d
+                        )
+                    )
+                )
         return config
 
     def has_task_in_queue(self, task_name):
@@ -71,7 +94,7 @@ class VirtualMachine(models.Model):
 
     @property
     def is_running(self):
-        return self.state_set.last().name in VAGRANT_RUNNING_STATES
+        return self.state_set.latest().name in VAGRANT_RUNNING_STATES
 
     def assign_flag(self, flag):
         """
@@ -108,6 +131,23 @@ class VirtualMachine(models.Model):
         return "[{}] - {} ({})".format(self.slug, self.name, self.category)
 
 
+class Download(models.Model):
+    slug = models.SlugField()
+    problem = models.ForeignKey(VirtualMachine)
+    path = models.CharField(max_length=4096)
+
+    @property
+    def abspath(self):
+        vagr = self.problem.get_vagrant()
+        return vagr.normalize_content_path(
+            self.path,
+            absolut=True
+        )
+
+    class Meta:
+        unique_together = ('problem', 'slug')
+
+
 class Tag(models.Model):
     name = models.SlugField(_("name"), unique=True)
     vm = models.ManyToManyField(VirtualMachine)
@@ -138,7 +178,6 @@ class Port(models.Model):
 
     def __str__(self):
         return "{}->{}:{}".format(self.host_port, self.vm.slug, self.guest_port)
-
 
 
 class State(models.Model):

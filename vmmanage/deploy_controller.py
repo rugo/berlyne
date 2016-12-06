@@ -54,7 +54,7 @@ def _vagr_factory(vm_slug):
     )
 
 
-def install_deployment(vagr_depl, vm):
+def install_deployment(vagr_depl: Deployment.Vagrant, vm):
     if isinstance(vm, str):
         vm = models.VirtualMachine.objects.get(slug=vm)
 
