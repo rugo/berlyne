@@ -74,6 +74,12 @@ class VirtualMachine(models.Model):
 
         if 'downloads' in config:
             for slug, d in config['downloads'].items():
+                if not slug.isalnum():
+                    raise ValueError(
+                        "Download slug '{}' is not alphanumeric.".format(
+                            slug
+                        )
+                    )
                 self.download_set.add(
                     Download.objects.create(
                         slug=slug,

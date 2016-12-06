@@ -6,6 +6,7 @@ from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from . import models
 from vmmanage.models import Download
 from os import path
+from collections import defaultdict
 from wsgiref.util import FileWrapper
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -170,7 +171,7 @@ def _parse_problem_desc(problem):
             'wui_download_file',
             kwargs={'download_id': download.pk}
         )
-    return problem.desc.format(**ctx)
+    return problem.desc.format_map(defaultdict(str, **ctx))
 
 
 def _course_problem_dict(course, user):
