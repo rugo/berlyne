@@ -153,6 +153,8 @@ class Download(models.Model):
     class Meta:
         unique_together = ('problem', 'slug')
 
+    def __str__(self):
+        return self.path
 
 class Tag(models.Model):
     name = models.SlugField(_("name"), unique=True)
