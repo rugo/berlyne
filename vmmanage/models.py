@@ -6,19 +6,26 @@ from random import randint, choice as rand_choice
 from django.utils.translation import ugettext_lazy as _
 import string
 
+LEGAL_API_VM_ACTIONS = [
+    'start',
+    'stop',
+    'status',
+    # 'address',
+    'resume',
+    'suspend',
+    'reload'
+]
+
 MIN_PORT = 1025
 MAX_PORT = 2**16-1
 
 RANDOM_FLAG_TEMPLATE = "flag{{{}}}"
+FLAG_FILE_NAME = "flag.txt"
 RANDOM_FLAG_CHARS = string.ascii_letters + string.digits
 RANDOM_FLAG_LEN = 24
 
 DEFAULT_TASK_NAME = "unnamed_task"
 TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
-
-VAGRANT_RUNNING_STATES = ('running',)
-VAGRANT_STOPPED_STATES = ('stopped', "not_created")
-VAGRANT_STATES = VAGRANT_RUNNING_STATES + VAGRANT_STOPPED_STATES
 
 
 class VirtualMachine(models.Model):
@@ -39,6 +46,29 @@ class VirtualMachine(models.Model):
 
     class Meta:
         ordering = ("slug", )
+
+    def predict_state(self):
+        """
+        Predict the state the VM will be in after its tasks are done.
+        Since there might be multiple workers, this should be used
+        in a atomic DB block in case the state should be manipulated.
+        :param vm: VM to predict
+        :return: predicted state
+        """
+        ts = self.task_set.filter(
+            task__status__in=[
+                task_models.RUNNING,
+                task_models.WAITING
+            ]
+        ).order_by('-task__scheduled')
+        for t in ts:
+            # Move down the task stack until one is found that changes the state
+            try:
+                return Deployment.ASSOCIATED_STATES[t.task_name]
+            except KeyError:
+                pass
+        # if no state manipulating task is found, return the current state
+        return self.state_set.latest().name
 
     def get_vagrant(self):
         if not self.__vagr_instance:
@@ -100,7 +130,7 @@ class VirtualMachine(models.Model):
 
     @property
     def is_running(self):
-        return self.state_set.latest().name in VAGRANT_RUNNING_STATES
+        return self.state_set.latest().name in Deployment.VAGRANT_RUNNING_STATES
 
     def assign_flag(self, flag):
         """
@@ -261,3 +291,10 @@ class Task(models.Model):
 
     def __str__(self):
         return "{} [{}]".format(self.task_name, TASK_STATUS_NAMES[self.task.status])
+
+
+def vagr_factory(vm_slug):
+    return Deployment.Vagrant(
+        vm_slug,
+        deployment_path=settings.VAGR_DEPLOYMENT_PATH,
+    )

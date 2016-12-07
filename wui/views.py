@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from . import models
 from vmmanage.models import Download
+from vmmanage import views as vm_views
 from os import path
 from collections import defaultdict
 from wsgiref.util import FileWrapper
@@ -108,6 +109,7 @@ def course_show(request, course_slug):
 @permission_required('can_manage_course')
 def course_delete(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
+    vm_views.stop_unused_vms(course.problems.all())
     course.delete()
     return redirect(reverse('wui_courses') + "?m=deleted")
 
@@ -331,14 +333,19 @@ def course_manage_problems(request, course_slug):
         if form.is_valid():
             new_problems = form.cleaned_data['problems']
 
-            models.CourseProblems.objects.filter(
+            removed_problems = models.CourseProblems.objects.filter(
                 course=course
-            ).exclude(problem__in=new_problems).delete()
+            ).exclude(problem__in=new_problems)
+
+            vm_views.stop_unused_vms([r.problem for r in removed_problems])
+
+            removed_problems.delete()
 
             for problem in new_problems:
                 models.CourseProblems.objects.update_or_create(
                     course=course, problem=problem, defaults={'points': problem.default_points}
                 )
+            vm_views.start_used_vms(new_problems)
             return redirect(reverse('wui_points_to_problems',
                                     kwargs={'course_slug': course_slug}))
 
@@ -520,7 +527,6 @@ def download_file(request, download_id):
     return HttpResponse(
         "Not Found", status=HTTP_NOT_FOUND
     )
-
 
 
 def index(request):

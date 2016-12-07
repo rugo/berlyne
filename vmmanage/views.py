@@ -1,21 +1,40 @@
-from django.shortcuts import get_object_or_404, render, redirect
-from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.contrib.auth.decorators import permission_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseNotAllowed
-from . import models
-from . import util
+from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
+from django.utils.translation import ugettext_lazy as _
+
+import vmmanage.models
+from uptomate.Deployment import (
+    VAGRANT_RUNNING_STATES,
+    VAGRANT_STOPPED_STATES
+)
 from . import deploy_controller
 from . import forms
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.decorators import permission_required
-from django.urls import reverse
-
+from . import models
+from . import util
 
 _INSTALL_MSGS = {
     'formerror': _("The submitted form was invalid!"),
     'success': _("The problem is getting installed, this may take a while."),
     'exists': _("A problem with that slug is already installed!")
 }
+
+
+def start_used_vms(vms=None):
+    deploy_controller.vm_action_on_states('start', VAGRANT_STOPPED_STATES, vms)
+
+
+def stop_unused_vms(vms):
+    # Check if really unused
+    unused_vms = []
+    for vm in vms:
+        if vm.course_set.exists():
+            unused_vms.append(vm)
+    if unused_vms:
+        deploy_controller.vm_action_on_states('stop', VAGRANT_RUNNING_STATES, unused_vms)
 
 
 def _run_task_on_existing_vm(action, vm_slug, **kwargs):
@@ -174,7 +193,7 @@ def problem_detail(request, problem_slug):
         {
             "problem": get_object_or_404(models.VirtualMachine,
                                          slug=problem_slug),
-            "actions": deploy_controller.LEGAL_API_VM_ACTIONS
+            "actions": vmmanage.models.LEGAL_API_VM_ACTIONS
         }
     )
 

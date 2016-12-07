@@ -6,7 +6,7 @@ from autotask.models import (
     DONE
 )
 
-from vmmanage.models import VAGRANT_RUNNING_STATES
+from uptomate.Deployment import  VAGRANT_RUNNING_STATES
 
 register = template.Library()
 
