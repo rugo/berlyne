@@ -40,6 +40,9 @@ class VirtualMachine(models.Model):
     flag = models.CharField(max_length=255)
     default_points = models.PositiveSmallIntegerField(default=0)
 
+    # Important for mutliprocessing
+    locked = models.BooleanField(default=False)
+
     # Stores config of problem running on this machine
     __vagr_config = None
     __vagr_instance = None
@@ -69,6 +72,20 @@ class VirtualMachine(models.Model):
                 pass
         # if no state manipulating task is found, return the current state
         return self.state_set.latest().name
+
+    def lock(self):
+        with transaction.atomic():
+            del self.locked  # so it gets reloaded from db
+            in_use = self.locked
+            if in_use:
+                return False
+            self.locked = True
+            self.save()
+        return True
+
+    def unlock(self):
+        self.locked = False
+        self.save()
 
     def get_vagrant(self):
         if not self.__vagr_instance:
