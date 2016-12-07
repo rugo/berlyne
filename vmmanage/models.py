@@ -75,7 +75,7 @@ class VirtualMachine(models.Model):
 
     def lock(self):
         with transaction.atomic():
-            del self.locked  # so it gets reloaded from db
+            self.refresh_from_db()
             in_use = self.locked
             if in_use:
                 return False
