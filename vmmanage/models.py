@@ -217,8 +217,8 @@ class VirtualMachine(models.Model):
         return self.desc.format_map(defaultdict(str, **ctx))
 
     def __str__(self):
-        return "[{}] - {} ({}) - {}".format(
-            self.slug, self.name, self.category,
+        return "{}[{}] ({}) - {}".format(
+            self.name, self.default_points, self.category,
             ",".join([str(t) for t in self.tag_set.all()])
         )
 
