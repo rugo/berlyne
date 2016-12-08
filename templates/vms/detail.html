@@ -19,7 +19,7 @@
                 <li class="list-group-item"><strong>{% trans 'Ports' %}</strong>: {% for port in problem.port_set.all %}{{ port }}{% endfor %}
                 <li class="list-group-item"><strong>{% trans 'Category' %}</strong>: {{ problem.category }}</li>
                 <li class="list-group-item"><strong>{% trans 'Tags' %}</strong>: {{ problem.tag_set.all|joinby:", "}}</li>
-                <li class="list-group-item"><strong>{% trans 'Downloads' %}</strong>:<br /> {{ problem.download_set.all|joinby:",<br/>"}}</li>
+                <li class="list-group-item"><strong>{% trans 'Downloads' %}</strong>:<br /> {% for dl in problem.download_set.all %}{{ dl }}<br />{% endfor %}</li>
 
                 <li class="list-group-item"><strong>{% trans 'Flag' %}</strong>: {{ problem.flag }}</li>
               </ul>
