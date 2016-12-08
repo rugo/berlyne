@@ -1,16 +1,45 @@
 {% extends "base.html" %}
 {% load berlyne_extra %}
 {% load i18n %}
+{% load static %}
 {% block title %}Manage Problems{% endblock %}
 {% block content %}
-    <legend><span class="col-sm-offset-1">{% trans "Assign problems to course" %}</span></legend>
-    <form method="POST">
-        {% csrf_token %}
+    {% comment %}
+        This is a hack to use the FilteredSelectMultiple from the admin.
+        Thats not very pretty, since this relies a lot on code from the admin.
+        The main problem here, is that I'm a lazy fuck and I don't want to
+        write this thing by myself...
+    {% endcomment %}
+    <script type="text/javascript" src="/admin/jsi18n/"></script>
+    <script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+    <script src="{% static "js/jquery-1.12.4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/SelectFilter2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/SelectBox.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/widgets.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}"/>
 
-        {% for field in form %}
-            {% include 'registration/form_field.html' %}
-        {% endfor %}
+    {% comment %}
+        Hack, so warnings dont dissapear behind head bar
+    {% endcomment %}
+    <style>
+    body {
+        padding: 40px;
+    }
+    </style>
 
-        <input type="submit" value="{% trans "Assign Points" %}" class="btn btn-default" />
-    </form>
+    <h1>{% trans "Assign problems to course" %}</h1>
+    <fieldset class="module aligned">
+        <div class="form-row">
+            <form method="post" action=".">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" value="submit" class="btn btn-primary">Save and<br>Assign Points</button>
+            </form>
+        </div>
+    </fieldset>
+    <script type="text/javascript">
+    addEvent(window, "load", function(e) { SelectFilter.init("id_problems", "problemsxx", 0, "{% static 'admin/' %}"); });
+    </script>
 {% endblock %}

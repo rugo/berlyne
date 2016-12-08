@@ -315,6 +315,7 @@ def course_scoreboard(request, course_slug):
 @permission_required('can_manage_course')
 def course_manage_problems(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
+    errors = []
     if request.POST:
         form = AddProbForm(request.POST, instance=course)
         if form.is_valid():
@@ -335,11 +336,14 @@ def course_manage_problems(request, course_slug):
             vm_views.start_used_vms(new_problems)
             return redirect(reverse('wui_points_to_problems',
                                     kwargs={'course_slug': course_slug}))
+        else:
+            errors.append("Please select at least one valid problem")
 
     return render(
         request,
         "courses/manage_problems.html",
         {
+            "errors": errors,
             "course_name": course.name,
             "form": AddProbForm(instance=course)
         }

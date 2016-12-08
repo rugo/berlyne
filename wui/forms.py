@@ -10,7 +10,7 @@ from django.contrib.auth.forms import (
     UserCreationForm,
     UsernameField
 )
-
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from . import models
@@ -45,6 +45,7 @@ class AddProbForm(ModelForm):
     class Meta:
         model = models.Course
         fields = ("problems",)
+        widgets = {'problems': FilteredSelectMultiple("Problems", False)}
 
 
 class PointToProbForm(Form):
