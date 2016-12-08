@@ -4,20 +4,6 @@
 {% block title %}{% trans "Installed problems" %}{% endblock %}
 {% block content %}
     <h1>Installed Problems</h1>
-    {% if errors %}
-        {% for error in errors %}
-            <div class="alert alert-danger">
-              {{ error }}
-            </div>
-        {% endfor %}
-    {% endif %}
-    {% if success %}
-        {% for msg in success %}
-            <div class="alert alert-success">
-              {{ msg }}
-            </div>
-        {% endfor %}
-    {% endif %}
     <hr>
 
     <table class="table">

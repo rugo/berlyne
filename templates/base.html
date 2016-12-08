@@ -105,6 +105,27 @@
     <div class="container">
 
       <div class="content">
+        {% if errors %}
+            {% for error in errors %}
+                <div class="alert alert-danger">
+                  {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if success %}
+            {% for msg in success %}
+                <div class="alert alert-success">
+                  {{ msg }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if infos %}
+            {% for msg in infos %}
+                <div class="alert alert-info">
+                  {{ msg }}
+                </div>
+            {% endfor %}
+        {% endif %}
         {% block content %}
             <h1>Create a Page</h1>
             <p class="lead">So this disappears.</p>
