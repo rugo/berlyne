@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 def __setup_create_groups():
     group, created = Group.objects.get_or_create(name='teachers')
-    perm_course = Permission.objects.create(
+    perm_course = Permission.objects.install(
         codename="can_manage_course",
         name="can manage course",
         content_type=ContentType.objects.get_for_model(models.Course))
-    perm_vm = Permission.objects.create(
+    perm_vm = Permission.objects.install(
         codename="can_manage_vm",
         name="can manage vm",
         content_type=ContentType.objects.get_for_model(models.Course))

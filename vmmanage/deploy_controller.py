@@ -73,13 +73,13 @@ def create_deployment(vm_slug, vagrant_name):
 
     t = tasks.run_on_vagr(
         vagr,
-        'create',
+        'install',
         vm,
         __install_deployment_callback,
         vagrant_file_path=path.join(settings.VAGR_VAGRANT_PATH, vagrant_name)
     )
 
-    vm.add_task(t, 'create')
+    vm.add_task(t, 'install')
     return task_dict_success(t)
 
 
