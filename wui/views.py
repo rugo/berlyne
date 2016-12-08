@@ -337,7 +337,7 @@ def course_manage_problems(request, course_slug):
             return redirect(reverse('wui_points_to_problems',
                                     kwargs={'course_slug': course_slug}))
         else:
-            errors.append("Please select at least one valid problem")
+            errors.append("Select at least one valid problem")
 
     return render(
         request,
