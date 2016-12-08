@@ -24,7 +24,7 @@ _INSTALL_MSGS = {
 
 
 def start_used_vms(vms=None):
-    deploy_controller.vm_action_on_states('start', VAGRANT_STOPPED_STATES, vms)
+    deploy_controller.vm_action_on_states(settings.DEFAULT_USED_ACTION, VAGRANT_STOPPED_STATES, vms)
 
 
 def stop_unused_vms(vms):
@@ -34,7 +34,7 @@ def stop_unused_vms(vms):
         if vm.course_set.exists():
             unused_vms.append(vm)
     if unused_vms:
-        deploy_controller.vm_action_on_states('stop', VAGRANT_RUNNING_STATES, unused_vms)
+        deploy_controller.vm_action_on_states(settings.DEFAULT_UNUSED_ACTION, VAGRANT_RUNNING_STATES, unused_vms)
 
 
 def _run_task_on_existing_vm(action, vm_slug, **kwargs):

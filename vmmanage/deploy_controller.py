@@ -13,7 +13,6 @@ from uptomate.Deployment import (
     INSTANCE_DIR_NAME,
     INSTALLED_MARKER_FILE
 )
-from vmmanage import models
 from .models import (
     vagr_factory,
     FLAG_FILE_NAME,

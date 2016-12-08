@@ -156,6 +156,19 @@ IN_TEST_MODE = DEBUG
 # for VMs to create
 TASK_TTL = 60 * 60 * 24
 
+# These default actions manage how berlyne treats VMs that
+# are/are not used in any course. For compatibility with
+# plugins like 'digital ocean' this is start/stop, in
+# case you want to drop this compatibility and use
+# exclusively VirtualBox/Docker, you can change this
+# to "suspend"/"resume" for faster boot times
+
+# Default action to run on VMs when they become unused
+DEFAULT_UNUSED_ACTION = "stop"
+# Default action to run on VMs that are in use,
+# this has to be the opposite of DEFAULT_UNUSED_ACTION
+DEFAULT_USED_ACTION = "start"
+
 # autotask
 AUTOTASK_IS_ACTIVE = True
 AUTOTASK_WORKER_EXECUTABLE = "/home/rg/thesis_src/uptopy/bin/python"

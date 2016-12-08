@@ -1,9 +1,13 @@
 from django.db import models, transaction
 from django.conf import settings
+from django.urls import reverse
+from collections import defaultdict
 from autotask import models as task_models
 from uptomate import Deployment
+from uptomate.Provider import LOCALHOST, ALLOWED_PROVIDERS
 from random import randint, choice as rand_choice
 from django.utils.translation import ugettext_lazy as _
+import logging
 import string
 
 LEGAL_API_VM_ACTIONS = [
@@ -24,15 +28,20 @@ FLAG_FILE_NAME = "flag.txt"
 RANDOM_FLAG_CHARS = string.ascii_letters + string.digits
 RANDOM_FLAG_LEN = 24
 
+UNKNOWN_HOST = "*unknown*"
+
 DEFAULT_TASK_NAME = "unnamed_task"
 TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 class VirtualMachine(models.Model):
     slug = models.SlugField(unique=True)
     name = models.CharField(_("name"), max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     ip_addr = models.CharField(_("IP Address"), max_length=45)
+    provider = models.CharField(max_length=255)
 
     # Attrs used from config
     desc = models.TextField(_("description"), max_length=1024)
@@ -40,7 +49,8 @@ class VirtualMachine(models.Model):
     flag = models.CharField(max_length=255)
     default_points = models.PositiveSmallIntegerField(default=0)
 
-    # Important for mutliprocessing
+    # This should only be modified using the
+    # lock() and unlock() method
     locked = models.BooleanField(default=False)
 
     # Stores config of problem running on this machine
@@ -89,10 +99,7 @@ class VirtualMachine(models.Model):
 
     def get_vagrant(self):
         if not self.__vagr_instance:
-            self.__vagr_instance = Deployment.Vagrant(
-                self.slug,
-                deployment_path=settings.VAGR_DEPLOYMENT_PATH
-            )
+            self.__vagr_instance = vagr_factory(self.slug)
         return self.__vagr_instance
 
     def __get_problem_config(self):
@@ -179,6 +186,35 @@ class VirtualMachine(models.Model):
                     vm=self
                 )
         return ports
+
+    def parse_desc(self):
+        if not self.provider or self.ip_addr == UNKNOWN_HOST:
+            return None
+        ctx = {
+            'HOST': settings.DOMAIN if self.ip_addr == LOCALHOST else self.ip_addr
+        }
+
+        try:
+            provider = ALLOWED_PROVIDERS[self.provider]
+        except KeyError:
+            logger.warning(
+                "Illegal provider '%s' used in VM %s",
+                self.provider, self.slug
+            )
+            return None
+
+        for port in self.port_set.all():
+            if provider.port_forwarding:
+                ctx['PORT_{}'.format(port.guest_port)] = port.host_port
+            else:
+                ctx['PORT_{}'.format(port.guest_port)] = port.guest_port
+
+        for download in self.download_set.all():
+            ctx['DL_{}'.format(download.slug)] = reverse(
+                'wui_download_file',
+                kwargs={'download_id': download.pk}
+            )
+        return self.desc.format_map(defaultdict(str, **ctx))
 
     def __str__(self):
         return "[{}] - {} ({})".format(self.slug, self.name, self.category)

@@ -4,10 +4,9 @@ from django.conf import settings
 from django.http import HttpResponse
 from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from . import models
-from vmmanage.models import Download
+from vmmanage.models import Download, UNKNOWN_HOST
 from vmmanage import views as vm_views
 from os import path
-from collections import defaultdict
 from wsgiref.util import FileWrapper
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -32,7 +31,8 @@ MESSAGES = {
     'joined': _("You joined the course"),
     'deleted': _("You deleted the course"),
     'left': _("You left the course"),
-    'join_first': _("Join the course first")
+    'join_first': _("Join the course first"),
+    'problem_not_ready': _("The problem has not been initialized yet")
 }
 
 
@@ -162,20 +162,6 @@ def course_leave(request, course_slug):
     return redirect(reverse('wui_courses') + "?m=left")
 
 
-def _parse_problem_desc(problem):
-    ctx = {
-        'HOST': settings.DOMAIN if problem.ip_addr == LOCALHOST else problem.ip_addr
-    }
-    for port in problem.port_set.all():
-        ctx['PORT_{}'.format(port.guest_port)] = port.host_port
-    for download in problem.download_set.all():
-        ctx['DL_{}'.format(download.slug)] = reverse(
-            'wui_download_file',
-            kwargs={'download_id': download.pk}
-        )
-    return problem.desc.format_map(defaultdict(str, **ctx))
-
-
 def _course_problem_dict(course, user):
     categories = {}
     total_points = 0
@@ -187,7 +173,8 @@ def _course_problem_dict(course, user):
             'title': course_prob.problem.name,
             'slug': course_prob.problem.slug,
             'points': course_prob.points,
-            'desc': _parse_problem_desc(course_prob.problem),
+            'desc': course_prob.problem.parse_desc() or
+                        MESSAGES['problem_not_ready'],
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
             ),

@@ -1,7 +1,7 @@
 from autotask.tasks import delayed_task
 from uptomate import Deployment
 from django.conf import settings
-from .models import State
+from .models import State, UNKNOWN_HOST
 from subprocess import CalledProcessError
 from time import sleep
 
@@ -27,16 +27,18 @@ def run_on_vagr(vagr_depl, f, vm_db, callback=None, **kwargs):
     if callback:
         callback(vagr_depl, f, vm_db, **kwargs)
 
-    vm_db.state_set.add(State(name=vagr_depl.status().state), bulk=False)
+    status = vagr_depl.status()
+    vm_db.provider = status.provider
+    vm_db.state_set.add(State(name=status.state), bulk=False)
+
     try:
         vm_db.ip_addr = vagr_depl.service_network_address()
     except CalledProcessError:
         # this does not work all the time, e.g. when the command
         # was 'stop', however, that should never affect the
         # result of the actual command called
-        vm_db.ip_addr = "Unknown"
-    vm_db.locked = False
-    vm_db.save()
+        vm_db.ip_addr = UNKNOWN_HOST
+    vm_db.unlock()
     return MSG_SUCCESS
 
 
