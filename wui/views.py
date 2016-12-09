@@ -493,7 +493,7 @@ def _download_wrapped_file(download):
     download_path = download.abspath
     if not path.exists(download_path):
         return HttpResponse("Download not found", status=HTTP_NOT_FOUND)
-    wrapper = FileWrapper(open(download_path))
+    wrapper = FileWrapper(open(download_path, "rb"))
     response = HttpResponse(wrapper, content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(
         DOWNLOAD_FNAME_TEMLATE.format(
