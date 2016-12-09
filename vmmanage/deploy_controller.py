@@ -12,7 +12,8 @@ from django.db import IntegrityError
 from uptomate import Deployment
 from uptomate.Deployment import (
     INSTANCE_DIR_NAME,
-    INSTALLED_MARKER_FILE
+    INSTALLED_MARKER_FILE,
+    CONTENT_DIR_NAME
 )
 from .models import (
     vagr_factory,
@@ -68,8 +69,11 @@ def create_deployment(vm_slug, vagrant_name):
         return "VM with that name already exists in fs", HTTP_CONFLICT
 
     try:
-        vm = models.VirtualMachine.objects.create(slug=vm_slug)
-    except IntegrityError:
+        # Set name as work around, so unique contraint is not violated
+        # in case two VMs get created at the same time
+        vm = models.VirtualMachine.objects.create(slug=vm_slug,
+                                                  name=vm_slug)
+    except IntegrityError as ex:
         return "VM exists already in db", HTTP_CONFLICT
 
     t = tasks.run_on_vagr(
@@ -123,10 +127,11 @@ def find_installable_problems():
                 Deployment.CONFIG_FILE_NAME
             )
     ):
+        task_path = path.dirname(task_path)
         if not path.exists(
                 path.join(task_path, INSTANCE_DIR_NAME, INSTALLED_MARKER_FILE)
         ):
-            problems.append(path.split(path.dirname(task_path))[-1])
+            problems.append(path.split(task_path)[-1])
     return problems
 
 
