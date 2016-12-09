@@ -73,7 +73,7 @@ def create_deployment(vm_slug, vagrant_name):
         # in case two VMs get created at the same time
         vm = models.VirtualMachine.objects.create(slug=vm_slug,
                                                   name=vm_slug)
-    except IntegrityError as ex:
+    except IntegrityError:
         return "VM exists already in db", HTTP_CONFLICT
 
     t = tasks.run_on_vagr(
