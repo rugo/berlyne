@@ -8,6 +8,7 @@ from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.utils import timezone
+from django.db import IntegrityError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -116,8 +117,11 @@ def setup():
     Creates initial data
     """
     log("Creating inital berlyne data")
-    __setup_create_groups()
-    __setup_frontpage()
+    try:
+        __setup_create_groups()
+        __setup_frontpage()
+    except IntegrityError:
+        log("Could not initialize db! Is the db already initialized?")
     if settings.IN_TEST_MODE:
         log("creating test data since IN_TEST_MODE is true")
         __create_test_data()
