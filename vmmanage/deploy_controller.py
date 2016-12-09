@@ -12,8 +12,7 @@ from django.db import IntegrityError
 from uptomate import Deployment
 from uptomate.Deployment import (
     INSTANCE_DIR_NAME,
-    INSTALLED_MARKER_FILE,
-    CONTENT_DIR_NAME
+    INSTALLED_MARKER_FILE
 )
 from .models import (
     vagr_factory,
