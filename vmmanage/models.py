@@ -7,6 +7,7 @@ from uptomate import Deployment
 from uptomate.Provider import LOCALHOST, ALLOWED_PROVIDERS
 from random import randint, choice as rand_choice
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 import logging
 import string
 
@@ -81,7 +82,12 @@ class VirtualMachine(models.Model):
             except KeyError:
                 pass
         # if no state manipulating task is found, return the current state
-        return self.state_set.latest().name
+        try:
+            return self.state_set.latest().name
+        except ObjectDoesNotExist:
+            # No state, means somebody messed around with the DB
+            # return not_created, so actions will called anyways
+            return Deployment.VAGRANT_UNKNOWN
 
     def lock(self):
         with transaction.atomic():

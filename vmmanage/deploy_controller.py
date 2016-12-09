@@ -131,7 +131,9 @@ def find_installable_problems():
 
 def action_on_state(vms, action, states, **action_kwargs):
     for vm in vms:
-        if vm.predict_state() in states:
+        predicted_state = vm.predict_state()
+        if predicted_state == Deployment.VAGRANT_UNKNOWN or \
+                        predicted_state in states:
             run_on_existing(action, vm, **action_kwargs)
 
 
