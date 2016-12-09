@@ -1,7 +1,8 @@
 from glob import glob
 from http.client import (
     OK as HTTP_OK,
-    CONFLICT as HTTP_CONFLICT
+    CONFLICT as HTTP_CONFLICT,
+    NOT_FOUND as HTTP_NOT_FOUND
 )
 from os import path
 
@@ -107,7 +108,7 @@ def _task_from_slug(action, vm_slug, vm_db=None, **kwargs):
 
 def run_on_existing(action, vm_obj, **kwargs):
     if action not in LEGAL_API_VM_ACTIONS:
-        return "Action is not defined", 404
+        return "Action is not defined", HTTP_NOT_FOUND
     t = _task_from_slug(action, vm_obj.slug, vm_obj, **kwargs)
     vm_obj.add_task(t, action)
     return task_dict_success(t)
