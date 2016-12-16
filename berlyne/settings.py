@@ -143,6 +143,8 @@ USE_TZ = True
 
 TIME_ZONE = "Europe/Berlin"
 
+# Flatpages
+SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
@@ -151,10 +153,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(dir_t, 'static') for temp_list in TEMPLATES for dir_t in temp_list['DIRS']]
 
 # Berlyne specific config
+# If this is true, test data will be created
+
 IN_TEST_MODE = DEBUG
-# This is where we get the configs and provisioning
-# for VMs to create
-TASK_TTL = 60 * 60 * 24
 
 # These default actions manage how berlyne treats VMs that
 # are/are not used in any course. For compatibility with
@@ -170,14 +171,15 @@ DEFAULT_UNUSED_ACTION = "stop"
 DEFAULT_USED_ACTION = "start"
 
 # autotask
-AUTOTASK_IS_ACTIVE = True
-AUTOTASK_WORKER_EXECUTABLE = "/home/rg/thesis_src/uptopy/bin/python"
+AUTOTASK_IS_ACTIVE = "runserver" in sys.argv or "run_autotask" in sys.argv
+# Time the VMs tasks should be stored in the DB
+TASK_TTL = 60 * 60 * 24
 
 # uptomate
-VAGR_DEPLOYMENT_PATH = '/home/rg/thesis_src/berlyne/setup/example_problems'
-VAGR_VAGRANT_PATH = '/home/rg/thesis_src/berlyne/setup/vagrantfiles/'
+# Define where the problem folder is
+VAGR_DEPLOYMENT_PATH = os.path.join(BASE_DIR, 'problems')
+# Define where the vagrantfiles are
+VAGR_VAGRANT_PATH = os.path.join(BASE_DIR, 'vagrantfiles')
+# Define the default vagrant file name
 VAGR_DEFAULT_VAGR_FILE = 'ubuntu_docker'
-
-# Flatpages
-SITE_ID = 1
 
