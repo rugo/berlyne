@@ -1,0 +1,20 @@
+require_relative "vagrant_libs/uptomate_config_parse"
+
+Vagrant.configure('2') do |config|
+  
+    config.vm.define $slug do |config|
+        config.vm.synced_folder ".", "/vagrant", disabled: true
+        config.vm.synced_folder "content", "/opt", type: "rsync", owner: "root", group: "root",
+        rsync__args: ["--verbose", "-r", "--delete", "--copy-links", "--chmod=D775,F664",],
+        rsync__exclude: "dl_only/"
+        config.vm.provision :shell, path: "../setup"
+
+        $ports.each do |port|
+            config.vm.network "forwarded_port", guest: port["guest"], host: port["host"]
+        end
+        
+        # virtual box
+        config.vm.box = "ubuntu/trusty64"
+
+  end
+end

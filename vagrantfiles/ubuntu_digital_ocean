@@ -1,0 +1,33 @@
+require_relative "vagrant_libs/uptomate_config_parse"
+
+Vagrant.configure('2') do |config|
+  
+    config.vm.define $slug do |config|
+        ENV['VAGRANT_DEFAULT_PROVIDER'] = 'digital_ocean'
+        config.vm.synced_folder ".", "/vagrant", disabled: true
+        config.vm.synced_folder "content", "/opt", type: "rsync", owner: "root", group: "root",
+        rsync__args: ["--verbose", "-r", "--delete", "-z", "--copy-links", "--chmod=D775,F664",],
+        rsync__exclude: "dl_only/"
+        config.vm.provision :shell, path: "../setup"
+
+        $ports.each do |port|
+            config.vm.network "forwarded_port", guest: port["guest"], host: port["host"]
+        end
+        
+        # virtual box
+        config.vm.box = "ubuntu/trusty64"
+
+        # digital ocean
+        config.vm.provider :digital_ocean do |provider, override|
+            override.ssh.private_key_path = '~/.ssh/vagrant'
+            override.vm.box = 'digital_ocean'
+            override.vm.box_url = "https://github.com/devopsgroup-io/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+            override.nfs.functional = false 
+            provider.image = 'ubuntu-14-04-x32'
+            provider.token = "!!YOUR-API-KEY-HERE!!"
+            provider.region = 'fra1'
+            provider.size = '512mb'
+        end
+
+  end
+end
