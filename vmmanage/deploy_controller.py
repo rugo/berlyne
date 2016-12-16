@@ -117,6 +117,7 @@ def run_on_existing(action, vm_obj, **kwargs):
     return task_dict_success(t)
 
 
+# Todo: make cheaper
 def find_installable_problems():
     problems = []
     for task_path in glob(
@@ -127,10 +128,11 @@ def find_installable_problems():
             )
     ):
         task_path = path.dirname(task_path)
-        if not path.exists(
-                path.join(task_path, INSTANCE_DIR_NAME, INSTALLED_MARKER_FILE)
-        ):
-            problems.append(path.split(task_path)[-1])
+        task_name = path.split(task_path)[-1]
+        vagr = vagr_factory(task_name)
+        if not vagr.installed and not models.VirtualMachine.objects.filter(
+                slug=task_name).exists():
+            problems.append(task_name)
     return problems
 
 
