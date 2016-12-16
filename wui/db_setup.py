@@ -103,7 +103,7 @@ def __create_test_data():
         )
         problem.state_set.add(api_models.State(name="Installed"), bulk=False)
 
-    txt, res = deploy_controller.create_deployment("tutorial", "ubuntu_docker")
+    txt, res = deploy_controller.create_deployment("tutorial", settings.VAGR_DEFAULT_VAGR_FILE)
     if res != 200:
         log("Could not create deployment: " + txt)
 
