@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from . import models
 from os.path import join as _joinp
 from vmmanage import models as api_models
-from vmmanage import deploy_controller
+from vmmanage import deploy_controller, tasks, models as vm_models
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -46,41 +46,26 @@ def __setup_frontpage():
 
 def __create_test_data():
     u = User.objects.create_user(
-        "hans",
+        "participant",
         "hans@hans.hans",
-        "wtf123wtf"
+        "NoGood123"
     )
 
     su = User.objects.create_user(
-        "rg",
+        "admin",
         "not@lol.tld",
-        "penis123",
+        "NoGood123",
         is_staff=True,
         is_superuser=True
     )
 
+    tut_slug = "tutorial"
     su.groups.add(Group.objects.get(name="teachers"))
 
-    problems = [
-        api_models.VirtualMachine.objects.create(
-            slug="WebTask",
-            name="Super Web Task",
-            ip_addr="127.0.0.1",
-            desc="A web task",
-            category="Web",
-            flag="flag{hoho}",
-            default_points=100
-        ),
-        api_models.VirtualMachine.objects.create(
-            slug="PwnTask",
-            name="Hard PWN Task",
-            ip_addr="127.0.0.1",
-            desc="A pwn task",
-            category="Pwn",
-            flag="flag{hoho}",
-            default_points=200
-        )
-    ]
+    problem = api_models.VirtualMachine.objects.create(
+            slug=tut_slug,
+            name="Tutorial"
+    )
 
     course = models.Course.objects.create(
         name="Pwnable",
@@ -95,17 +80,21 @@ def __create_test_data():
 
     course.participants.add(u, su)
 
-    for problem in problems:
-        models.CourseProblems.objects.create(
+
+    models.CourseProblems.objects.create(
             course=course,
             problem=problem,
             points=150
-        )
-        problem.state_set.add(api_models.State(name="Installed"), bulk=False)
+    )
 
-    txt, res = deploy_controller.create_deployment("tutorial", settings.VAGR_DEFAULT_VAGR_FILE)
-    if res != 200:
-        log("Could not create deployment: " + txt)
+    tasks.run_on_vagr(
+        vm_models.vagr_factory(tut_slug),
+        "install",
+        problem,
+        deploy_controller._install_deployment_callback,
+        vagrant_file_path=_joinp(settings.VAGR_VAGRANT_PATH,
+                                 settings.VAGR_DEFAULT_VAGR_FILE)
+    )
 
 
 def log(msg, level=logging.WARN):

@@ -54,7 +54,7 @@ def install_deployment(vagr_depl: Deployment.Vagrant, vm):
         f.write(config['flag'])
 
 
-def __install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
+def _install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
     install_deployment(vagr_depl, vm_db)
 
 
@@ -79,7 +79,7 @@ def create_deployment(vm_slug, vagrant_name):
         vagr,
         'install',
         vm,
-        __install_deployment_callback,
+        _install_deployment_callback,
         vagrant_file_path=path.join(settings.VAGR_VAGRANT_PATH, vagrant_name)
     )
 
