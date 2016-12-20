@@ -55,5 +55,9 @@ Supported providers for launching those VMs are:
 ## Contributing
 Pull-Requests are very welcome.
 
-If you want to share a task, please make sure to add the url to it to our
+If you want to share a task, please make sure to add the url to our
 [Berlyne Tasks](http://tasks.wass-ctf.xyz) (don't forget to add your license)!
+
+## Contact
+
+You can directly contact me @ berlyne[at]ht11[dot]org
