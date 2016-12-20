@@ -25,17 +25,13 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from uptomate import Deployment
-from uptomate.Deployment import (
-    INSTANCE_DIR_NAME,
-    INSTALLED_MARKER_FILE
-)
+from . import models
+from . import tasks
 from .models import (
     vagr_factory,
     FLAG_FILE_NAME,
     LEGAL_API_VM_ACTIONS
 )
-from . import models
-from . import tasks
 
 __AVAIL_VAGR_FILES = []
 
@@ -135,6 +131,8 @@ def run_on_existing(action, vm_obj, **kwargs):
 # Todo: make cheaper
 def find_installable_problems():
     problems = []
+    existing_slugs = models.VirtualMachine.objects.all().values_list('slug',
+                                                                     flat=True)
     for task_path in glob(
             path.join(
                 settings.VAGR_DEPLOYMENT_PATH,
@@ -145,8 +143,7 @@ def find_installable_problems():
         task_path = path.dirname(task_path)
         task_name = path.split(task_path)[-1]
         vagr = vagr_factory(task_name)
-        if not vagr.installed and not models.VirtualMachine.objects.filter(
-                slug=task_name).exists():
+        if task_name not in existing_slugs and not vagr.installed:
             problems.append(task_name)
     return problems
 
