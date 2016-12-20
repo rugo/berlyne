@@ -37,8 +37,8 @@ Also have a look at the example problems:
 Tasks can be shared via repository/download/usb stick/whatever, since they only consist of
 [three files](https://github.com/rugo/berlyne/wiki/Creating-Problems).
 
-Tasks shared by membes of the community are stored in the
-[Berlyne Tasks DB](http://tasks.wass-ctf.xyz). 
+Tasks shared by membes of the community are listed in the
+[Berlyne Problems Blockchain](problems_blockchain.txt). 
 
 On how to install them, please consult the [wiki](https://github.com/rugo/berlyne/wiki/Installing-Problems).
 
@@ -56,7 +56,11 @@ Supported providers for launching those VMs are:
 Pull-Requests are very welcome.
 
 If you want to share a task, please make sure to add the url to our
-[Berlyne Tasks](http://tasks.wass-ctf.xyz) (don't forget to add your license)!
+[Berlyne Problems Blockhain](problems_blockchain.txt) (don't forget to add your license)
+or just write an issue and I'll add it!
+
+If you publish a problem, please mention or link to this project, 
+so people can tell what the heck you did.
 
 ## Contact
 
