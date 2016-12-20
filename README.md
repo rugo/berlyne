@@ -32,6 +32,7 @@ Also have a look at the example problems:
 
 * [Example Web Problem](https://github.com/rugo/berlyne/wiki/Example-Web-Problem)
 * [Example Problem delivered with xinetd](https://github.com/rugo/berlyne/wiki/Example-xinetd-Problem)
+* [Collection of example Problems](https://github.com/rugo/berlyne-example-problems)
 
 ## Finding Problems
 Tasks can be shared via repository/download/usb stick/whatever, since they only consist of
