@@ -34,7 +34,7 @@ Also have a look at the example problems:
 * [Example Problem delivered with xinetd](https://github.com/rugo/berlyne/wiki/Example-xinetd-Problem)
 
 ## Finding Problems
-Tasks can be shared via repository/download/usb stick whatever, since they only consist of
+Tasks can be shared via repository/download/usb stick/whatever, since they only consist of
 [three files](https://github.com/rugo/berlyne/wiki/Creating-Problems).
 
 Tasks shared by membes of the community are stored in the
