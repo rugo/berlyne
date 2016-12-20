@@ -12,8 +12,15 @@ The basic workflow is this:
 
 All that is done via a Web UI.
 
+The platform is ready to be worked with, but is still under construction.
+
+## Requirements
+
+The current Version **0.1** is tested with **Python 3.4** and **Django 1.10** under Debian, but should also work
+with higher Python versions and other Unix derivates.
+
 ## Installing
-On how to use Berlyne, please consult the wiki page [Installing Berlyne](https://github.com/rugo/berlyne/wiki/Installing-Berlyne)
+On how to install Berlyne, please consult the wiki page [Installing Berlyne](https://github.com/rugo/berlyne/wiki/Installing-Berlyne)
 
 ## Problems
 Tasks in Berlyne are called problems, for pun reasons.
