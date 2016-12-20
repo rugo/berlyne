@@ -12,6 +12,11 @@ Crypto/RSA
 Adleman: https://github.com/rugo/berlyne-example-problems/tree/master/adleman
 
 
+Format String/ROP
+-----
+Snake: https://github.com/rugo/snake
+
+
 PHP
 -----
 Magic Hash: https://github.com/rugo/berlyne-example-problems/tree/master/magichash
