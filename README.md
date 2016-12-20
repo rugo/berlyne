@@ -4,7 +4,7 @@ Berlyne is a trainings platform for applied IT security.
 The basic workflow is this:
 
 * **Create a course**, activate scoreboard and write ups if wanted 
-* **Assign software problems** to the course, in the form of CTF tasks
+* **Assign software problems** - in the form of CTF tasks - to the course 
 * Berlyne starts the required problems in virtual machines
 * The problems description in the course gets updated with correct IP, ports and downloads
 * **Participants join** the course and solve the problems
@@ -12,11 +12,11 @@ The basic workflow is this:
 
 All that is done via a Web UI.
 
-The platform is ready to be worked with, but is still under construction.
+The platform is ready to be worked with, but is also still under heavy construction.
 
 ## Requirements
 
-The current Version **0.1** is tested with **Python 3.4** and **Django 1.10** under Debian, but should also work
+The current Version **0.1** is tested with **Python 3.4** and **Django 1.10** on Debian but should also work
 with higher Python versions and other Unix derivates.
 
 ## Installing
@@ -57,11 +57,8 @@ Supported providers for launching those VMs are:
 Pull-Requests are very welcome.
 
 If you want to share a task, please make sure to add the url to our
-[Berlyne Problems Blockhain](problems_blockchain.txt) (don't forget to add your license)
+[Berlyne Problems Blockhain](problems_blockchain.txt)
 or just write an issue and I'll add it!
-
-If you publish a problem, please mention or link to this project, 
-so people can tell what the heck you did.
 
 ## Contact
 
