@@ -13,18 +13,31 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from autotask.tasks import delayed_task
-from uptomate import Deployment
-from django.conf import settings
-from .models import State, UNKNOWN_HOST
 from subprocess import CalledProcessError
 from time import sleep
+
+from autotask.tasks import delayed_task
+from django.conf import settings
+
+from uptomate import Deployment
+from .models import State, UNKNOWN_HOST
 
 MSG_SUCCESS = "Finished"
 IN_USE_SLEEP_TIME = 10
 
 @delayed_task(ttl=settings.TASK_TTL)
 def run_on_vagr(vagr_depl, f, vm_db, callback=None, **kwargs):
+    """
+    This runs an action on a vagrant deployment. A action is
+    a method defined on vagr_depl. If autotask is active, this
+    will be done by a autotask worker.
+    :param vagr_depl: the vagrant deployment
+    :param f: the action to call
+    :param vm_db: the VM ORM object
+    :param callback: if not None, callback will be called after the action
+    :param kwargs: Arguments to call the callback with
+    :return:
+    """
     # TODO: Would be better to schedule the other tasks here
     # instead of waiting for the VM to get free
     # Wait until VM is free
