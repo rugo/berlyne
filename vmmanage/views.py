@@ -46,7 +46,7 @@ def stop_unused_vms(vms):
     # Check if really unused
     unused_vms = []
     for vm in vms:
-        if vm.course_set.exists():
+        if not vm.course_set.exists():
             unused_vms.append(vm)
     if unused_vms:
         deploy_controller.vm_action_on_states(settings.DEFAULT_UNUSED_ACTION, VAGRANT_RUNNING_STATES, unused_vms)
