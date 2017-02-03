@@ -25,7 +25,8 @@ from django.db.models import (
     Case,
     When,
     F,
-    Value
+    Value,
+    IntegerField
 )
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -35,7 +36,17 @@ from django.utils.translation import ugettext_lazy as _
 
 from vmmanage import views as vm_views
 from vmmanage.models import Download
-from .forms import *
+from . import models
+from .forms import (
+    UserForm,
+    CourseForm,
+    CoursePwForm,
+    AddProbForm,
+    PointToProbForm,
+    SubmissionForm,
+    WriteupForm,
+    UserEmailCreateForm,
+)
 
 DOWNLOAD_FNAME_TEMLATE = "{problem_slug}_{download_pk}_{filename}"
 MESSAGES = {
@@ -301,6 +312,7 @@ def course_scoreboard(request, course_slug):
                     then=F('submission__problem__points'),
                 ),
                 default=Value(0),
+                output_field=IntegerField()
             )
         )
     ).annotate(
