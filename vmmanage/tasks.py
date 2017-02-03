@@ -87,7 +87,8 @@ def destroy_vm_db(vm):
 
 
 @delayed_task(ttl=settings.TASK_TTL)
-def destroy_deployment(vagr_depl, vm):
-    destroy_vm_db(vm)
+def destroy_problem(vagr_depl, problem):
+    destroy_vm_db(problem.vm)
     vagr_depl.destroy()
+    problem.delete()
     return MSG_SUCCESS

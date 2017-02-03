@@ -14,15 +14,21 @@
               <ul class="list-group">
                 <li class="list-group-item"><strong>{% trans 'Created' %}</strong>: {{ problem.created_at }}</li>
                 <li class="list-group-item"><strong>{% trans 'Description' %}</strong>:<br /> {{ problem.desc }}</li>
-                <li class="list-group-item"><strong>{% trans 'IP-Address' %}</strong>: {{ problem.ip_addr }}</li>
-                <li class="list-group-item"><strong>{% trans 'Provider' %}</strong>: {{ problem.provider }}</li>
-                <li class="list-group-item"><strong>{% trans 'Ports' %}</strong>: {% for port in problem.port_set.all %}{{ port }}{% endfor %}
+                {% if problem.vm %}
+                <li class="list-group-item"><strong>{% trans 'IP-Address' %}</strong>: {{ problem.vm.ip_addr }}</li>
+                <li class="list-group-item"><strong>{% trans 'Provider' %}</strong>: {{ problem.vm.provider }}</li>
+                <li class="list-group-item"><strong>{% trans 'Ports' %}</strong>:
+                    {% for port in problem.vm.port_set.all %}{{ port }}{% endfor %}
+                {% endif %}
                 <li class="list-group-item"><strong>{% trans 'Category' %}</strong>: {{ problem.category }}</li>
                 <li class="list-group-item"><strong>{% trans 'Tags' %}</strong>: {{ problem.tag_set.all|joinby:", "}}</li>
-                <li class="list-group-item"><strong>{% trans 'Downloads' %}</strong>:<br /> {% for dl in problem.download_set.all %}{{ dl }}<br />{% endfor %}</li>
+                <li class="list-group-item"><strong>{% trans 'Downloads' %}</strong>:<br />
+                    {% for dl in problem.download_set.all %}{{ dl }}<br />{% endfor %}
+                </li>
 
                 <li class="list-group-item"><strong>{% trans 'Flag' %}</strong>: {{ problem.flag }}</li>
               </ul>
+                {% if problem.vm %}
                 <p>{% trans 'Manually perform tasks on the problem:' %}</p>
                   <div>
                           {% for action in actions %}
@@ -32,10 +38,12 @@
                           {% endfor %}
                           <a href="{% url 'vmmanage_problem_destroy' problem.slug %}" class="btn btn-danger">{% trans "Destroy" %}</a>
                   </div>
+              {% endif %}
               </div>
             </div>
     </div>
 
+    {% if problem.vm %}
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
@@ -50,7 +58,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                    {% for state in problem.state_set.all %}
+                    {% for state in problem.vm.state_set.all %}
                               <tr>
                                 <td>{{ state.name }}</td>
                                 <td>{{ state.created }}</td>
@@ -74,7 +82,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                    {% for task in problem.task_set.all %}
+                    {% for task in problem.vm.task_set.all %}
                           <tr data-toggle="collapse" data-target="#accordion-{{ task.task.pk }}" class="clickable {{ task.task.status|task_css_class }}">
                             <td>{{ task.task_name }}</td>
                             <td>{{ task.creation_date }}</td>
@@ -98,4 +106,5 @@
             </div>
         </div>
     </div>
+    {% endif %}
 {% endblock %}

@@ -13,18 +13,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import logging
+from os.path import join as _joinp
+
+from django.conf import settings
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
-from . import models
-from os.path import join as _joinp
-from vmmanage import models as api_models
-from vmmanage import deploy_controller, tasks, models as vm_models
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
-from django.conf import settings
-from django.utils import timezone
 from django.db import IntegrityError
-import logging
+from django.utils import timezone
+
+from . import models
 
 logger = logging.getLogger(__name__)
 
@@ -77,10 +77,10 @@ def __create_test_data():
     tut_slug = "tutorial"
     su.groups.add(Group.objects.get(name="teachers"))
 
-    problem = api_models.VirtualMachine.objects.create(
-            slug=tut_slug,
-            name="Tutorial"
-    )
+    # problem = deploy_controller.create_problem(
+    #    "tutorial",
+    #    settings.VAGR_DEFAULT_VAGR_FILE
+    # )
 
     course = models.Course.objects.create(
         name="Pwnable",
@@ -96,20 +96,11 @@ def __create_test_data():
     course.participants.add(u, su)
 
 
-    models.CourseProblems.objects.create(
-            course=course,
-            problem=problem,
-            points=150
-    )
-
-    tasks.run_on_vagr(
-        vm_models.vagr_factory(tut_slug),
-        "install",
-        problem,
-        deploy_controller._install_deployment_callback,
-        vagrant_file_path=_joinp(settings.VAGR_VAGRANT_PATH,
-                                 settings.VAGR_DEFAULT_VAGR_FILE)
-    )
+    # models.CourseProblems.objects.create(
+    #        course=course,
+    #        problem=problem,
+    #        points=150
+    # )
 
 
 def log(msg, level=logging.WARN):

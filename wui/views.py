@@ -13,20 +13,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, permission_required
-from django.conf import settings
-from django.http import HttpResponse
 from http.client import NOT_FOUND as HTTP_NOT_FOUND
-from . import models
-from vmmanage.models import Download, UNKNOWN_HOST
-from vmmanage import views as vm_views
 from os import path
 from wsgiref.util import FileWrapper
-from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
-from django.urls import reverse
-from .forms import *
+
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db import IntegrityError
 from django.db.models import (
     Sum,
@@ -37,8 +28,15 @@ from django.db.models import (
     IntegerField,
     Value
 )
-from uptomate.Provider import LOCALHOST
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
+from vmmanage import views as vm_views
+from vmmanage.models import Download
+from .forms import *
 
 DOWNLOAD_FNAME_TEMLATE = "{problem_slug}_{download_pk}_{filename}"
 MESSAGES = {
@@ -337,10 +335,11 @@ def course_manage_problems(request, course_slug):
             new_problems = form.cleaned_data['problems']
 
             removed_problems = models.CourseProblems.objects.filter(
-                course=course
+                course=course,
+                problem__virtualmachine__isnull=False
             ).exclude(problem__in=new_problems)
 
-            vm_views.stop_unused_vms([r.problem for r in removed_problems])
+            vm_views.stop_unused_vms([p.problem.vm for p in removed_problems])
 
             removed_problems.delete()
 
@@ -348,7 +347,13 @@ def course_manage_problems(request, course_slug):
                 models.CourseProblems.objects.update_or_create(
                     course=course, problem=problem, defaults={'points': problem.default_points}
                 )
-            vm_views.start_used_vms(new_problems)
+
+            new_problem_vms = []
+            for p in new_problems:
+                if p.vm:
+                    new_problem_vms.append(p.vm)
+
+            vm_views.start_used_vms(new_problem_vms)
             return redirect(reverse('wui_points_to_problems',
                                     kwargs={'course_slug': course_slug}))
         else:

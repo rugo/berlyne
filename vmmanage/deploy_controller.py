@@ -16,13 +16,11 @@
 from glob import glob
 from http.client import (
     OK as HTTP_OK,
-    CONFLICT as HTTP_CONFLICT,
     NOT_FOUND as HTTP_NOT_FOUND
 )
 from os import path
 
 from django.conf import settings
-from django.db import IntegrityError
 
 from uptomate import Deployment
 from . import models
@@ -54,53 +52,44 @@ def install_deployment(vagr_depl: Deployment.Vagrant, vm):
     if isinstance(vm, str):
         vm = models.VirtualMachine.objects.get(slug=vm)
 
-    try:
-        config = vm.set_align_config(vagr_depl.get_config())
-    except KeyError as ex:
-        raise ValueError("Problem config is missing '{}' field".format(str(ex)))
-
-    vagr_depl.set_ports(config['ports'])
-
+    vagr_depl.set_ports(vm.get_port_list())
     with vagr_depl.open_content_file(FLAG_FILE_NAME) as f:
-        f.write(config['flag'])
+        f.write(vm.problem.flag)
 
 
 def _install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
     install_deployment(vagr_depl, vm_db)
 
 
-def create_deployment(vm_slug, vagrant_name):
+def create_problem(problem_slug, vagrant_name):
+    vagr = vagr_factory(problem_slug)
 
-    if isinstance(vm_slug, models.VirtualMachine):
-        vm_slug = vm_slug.slug
-
-    vagr = vagr_factory(vm_slug)
     if vagr.installed:
-        return "VM with that name already exists in fs", HTTP_CONFLICT
+        raise OSError("Problem with that name already exists in fs")
 
-    try:
-        # Set name as work around, so unique contraint is not violated
-        # in case two VMs get created at the same time
-        vm = models.VirtualMachine.objects.create(slug=vm_slug,
-                                                  name=vm_slug)
-    except IntegrityError:
-        return "VM exists already in db", HTTP_CONFLICT
+    # Set name as work around, so unique contraint is not violated
+    # in case two VMs get created at the same time
+    # This raises an IntegretyError if the problem slug already exists
+    problem = models.Problem.create(slug=problem_slug, name=problem_slug,
+                                    config=vagr.get_config())
+    vm = problem.vm
 
-    t = tasks.run_on_vagr(
-        vagr,
-        'install',
-        vm,
-        _install_deployment_callback,
-        vagrant_file_path=path.join(settings.VAGR_VAGRANT_PATH, vagrant_name)
-    )
+    if vm:
+        t = tasks.run_on_vagr(
+            vagr,
+            'install',
+            vm,
+            _install_deployment_callback,
+            vagrant_file_path=path.join(settings.VAGR_VAGRANT_PATH, vagrant_name)
+        )
 
-    vm.add_task(t, 'install')
-    return task_dict_success(t)
+        vm.add_task(t, 'install')
+    return problem
 
 
-def destroy_deployment(vm):
-    vagr = vagr_factory(vm.slug)
-    return task_dict_success(tasks.destroy_deployment(vagr, vm))
+def destroy_problem(problem):
+    vagr = vagr_factory(problem.slug)
+    return task_dict_success(tasks.destroy_problem(vagr, problem.vm))
 
 
 def destroy_deployment_db(vm):
@@ -123,7 +112,7 @@ def _task_from_slug(action, vm_slug, vm_db=None, **kwargs):
 def run_on_existing(action, vm_obj, **kwargs):
     if action not in LEGAL_API_VM_ACTIONS:
         return "Action is not defined", HTTP_NOT_FOUND
-    t = _task_from_slug(action, vm_obj.slug, vm_obj, **kwargs)
+    t = _task_from_slug(action, vm_obj.problem.slug, vm_obj, **kwargs)
     vm_obj.add_task(t, action)
     return task_dict_success(t)
 
@@ -131,8 +120,7 @@ def run_on_existing(action, vm_obj, **kwargs):
 # Todo: make cheaper
 def find_installable_problems():
     problems = []
-    existing_slugs = models.VirtualMachine.objects.all().values_list('slug',
-                                                                     flat=True)
+    existing_slugs = models.Problem.objects.all().values_list('slug', flat=True)
     for task_path in glob(
             path.join(
                 settings.VAGR_DEPLOYMENT_PATH,
@@ -142,8 +130,7 @@ def find_installable_problems():
     ):
         task_path = path.dirname(task_path)
         task_name = path.split(task_path)[-1]
-        vagr = vagr_factory(task_name)
-        if task_name not in existing_slugs and not vagr.installed:
+        if task_name not in existing_slugs:
             problems.append(task_name)
     return problems
 

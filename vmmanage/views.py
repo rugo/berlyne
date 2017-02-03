@@ -16,6 +16,7 @@
 from django.conf import settings
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -33,6 +34,8 @@ from . import util
 
 _INSTALL_MSGS = {
     'formerror': _("The submitted form was invalid!"),
+    'invalidconfig': _("The problem's config is invalid!"),
+    'missingkey': _("The problem's config is missing a mandatory field."),
     'success': _("The problem is getting installed, this may take a while."),
     'exists': _("A problem with that slug is already installed!")
 }
@@ -53,7 +56,7 @@ def stop_unused_vms(vms):
 
 
 def _run_task_on_existing_vm(action, vm_slug, **kwargs):
-    vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
+    vm = get_object_or_404(models.VirtualMachine, problem__slug=vm_slug)
     return util.http_json_response(
         *deploy_controller.run_on_existing(action, vm, **kwargs)
     )
@@ -68,7 +71,7 @@ def vm_action(request, vm_slug, action_name):
 def vm_destroy(request, vm_slug):
     vm = get_object_or_404(models.VirtualMachine, slug=vm_slug)
     return util.http_json_response(
-        *deploy_controller.destroy_deployment(vm)
+        *deploy_controller.destroy_problem(vm)
     )
 
 
@@ -100,13 +103,6 @@ def vm_tasks(request, vm_slug):
             {
                 'tasks': task_list
             }
-    )
-
-
-@permission_required('can_manage_vm')
-def vm_create(request, vm_slug, vagrant_name):
-    return util.http_json_response(
-        *deploy_controller.create_deployment(vm_slug, vagrant_name)
     )
 
 
@@ -147,9 +143,9 @@ def show_installable_problems(request):
 
 @permission_required("can_manage_vm")
 def problem_destroy(request, problem_slug):
-    problem = get_object_or_404(models.VirtualMachine, slug=problem_slug)
+    problem = get_object_or_404(models.Problem, slug=problem_slug)
     if request.POST:
-        deploy_controller.destroy_deployment(problem)
+        deploy_controller.destroy_problem(problem)
         return redirect('vmmanage_show_problems')
     return render(
         request,
@@ -168,9 +164,17 @@ def install_problem(request):
     if form.is_valid():
         vagr_name = form.cleaned_data['vagrant_file']
         problem_name = request.POST['problem']
-        reason, code = deploy_controller.create_deployment(problem_name, vagr_name)
-        if code == deploy_controller.HTTP_CONFLICT:
+        try:
+            deploy_controller.create_problem(problem_name, vagr_name)
+        except (OSError, IntegrityError) as ex:
+            print(ex)
             return redirect(reverse('vmmanage_show_installable') + '?m=exists')
+        except ValueError as ex:
+            print(ex)
+            return redirect(reverse('vmmanage_show_installable') + '?m=invalidconfig')
+        except KeyError as ex:
+            print(ex)
+            return redirect(reverse('vmmanage_show_installable') + "?m=missingkey")
     else:
         return redirect(reverse('vmmanage_show_installable') + '?m=formerror')
 
@@ -184,7 +188,7 @@ def problem_overview(request):
         request,
         "vms/overview.html",
         {
-            "problems": models.VirtualMachine.objects.all(),
+            "problems": models.Problem.objects.all(),
         }
     )
 
@@ -206,7 +210,7 @@ def problem_detail(request, problem_slug):
         request,
         "vms/detail.html",
         {
-            "problem": get_object_or_404(models.VirtualMachine,
+            "problem": get_object_or_404(models.Problem,
                                          slug=problem_slug),
             "actions": vmmanage.models.LEGAL_API_VM_ACTIONS
         }
@@ -215,7 +219,7 @@ def problem_detail(request, problem_slug):
 
 @permission_required("can_manage_vm")
 def edit_problem(request, problem_slug):
-    problem = get_object_or_404(models.VirtualMachine, slug=problem_slug)
+    problem = get_object_or_404(models.Problem, slug=problem_slug)
 
     if request.POST:
         form = forms.ProblemEditForm(request.POST,

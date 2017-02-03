@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from django.forms import Form, ChoiceField, ModelForm
+
 from . import deploy_controller
 from . import models
 
@@ -26,5 +27,5 @@ class VagrantFilesForm(Form):
 
 class ProblemEditForm(ModelForm):
     class Meta:
-        model = models.VirtualMachine
+        model = models.Problem
         fields = ["name", "desc", "category"]

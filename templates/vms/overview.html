@@ -20,8 +20,17 @@
                       <tr>
                         <td><a href="{% url "vmmanage_detail_problem" problem.slug %}">{{ problem.slug }}</a></td>
                         <td>{{ problem.name }}</td>
-                        <td class="{{ problem.state_set.latest.name|state_css_class }}">{{ problem.state_set.latest }}</td>
-                        <td class="{{ problem.task_set.latest.task.status|task_css_class }}">{{ problem.task_set.latest }}</td>
+                          {% if problem.vm %}
+                            <td class="{{ problem.vm.state_set.latest.name|state_css_class }}">
+                                {{ problem.vm.state_set.latest }}
+                            </td>
+                            <td class="{{ problem.vm.task_set.latest.task.status|task_css_class }}">
+                                {{ problem.vm.task_set.latest }}
+                            </td>
+                          {% else %}
+                              <td>{% trans "DL only" %}</td>
+                              <td>{% trans "DL only" %}</td>
+                          {% endif %}
                       </tr>
             {% endfor %}
     </table>
