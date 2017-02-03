@@ -83,7 +83,6 @@ class VirtualMachine(models.Model):
         Predict the state the VM will be in after its tasks are done.
         Since there might be multiple workers, this should be used
         in a atomic DB block in case the state should be manipulated.
-        :param vm: VM to predict
         :return: predicted state
         """
         ts = self.task_set.filter(
