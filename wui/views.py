@@ -25,7 +25,6 @@ from django.db.models import (
     Case,
     When,
     F,
-    IntegerField,
     Value
 )
 from django.http import HttpResponse
@@ -302,7 +301,6 @@ def course_scoreboard(request, course_slug):
                     then=F('submission__problem__points'),
                 ),
                 default=Value(0),
-                output_field=IntegerField()
             )
         )
     ).annotate(
