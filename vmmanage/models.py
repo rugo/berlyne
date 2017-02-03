@@ -13,18 +13,20 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from django.db import models, transaction
-from django.conf import settings
-from django.urls import reverse
-from collections import defaultdict
-from autotask import models as task_models
-from uptomate import Deployment
-from uptomate.Provider import LOCALHOST, ALLOWED_PROVIDERS
-from random import randint, choice as rand_choice
-from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 import logging
 import string
+from collections import defaultdict
+from random import randint, choice as rand_choice
+
+from autotask import models as task_models
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, transaction
+from django.urls import reverse
+from django.utils.translation import ugettext_lazy as _
+
+from uptomate import Deployment
+from uptomate.Provider import LOCALHOST, ALLOWED_PROVIDERS
 
 LEGAL_API_VM_ACTIONS = [
     'start',
@@ -107,8 +109,7 @@ class VirtualMachine(models.Model):
     def lock(self):
         with transaction.atomic():
             self.refresh_from_db()
-            in_use = self.locked
-            if in_use:
+            if self.locked:
                 return False
             self.locked = True
             self.save()
