@@ -13,18 +13,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from django.db import models
-import vmmanage.models
 from django.contrib.auth import models as auth_models
-from django.utils.translation import ugettext_lazy as _
+from django.db import models
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+
+import vmmanage.models
+
 
 class Course(models.Model):
     name = models.SlugField(_('name'), unique=True)
     description = models.TextField(_('description'), max_length=1024)
     creation_time = models.DateTimeField(_('creation date'), auto_now_add=True)
-    # start_time = models.DateTimeField(_('start time'), )
-    # end_time = models.DateTimeField(_('end time'), )
     show_scoreboard = models.BooleanField(_('show scoreboard'), default=True)
 
     teacher = models.ForeignKey(auth_models.User,
