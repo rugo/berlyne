@@ -82,8 +82,7 @@ def create_problem(problem_slug, vagrant_name):
 
 
 def destroy_problem(problem):
-    vagr = vagr_factory(problem.slug)
-    return tasks.destroy_problem(vagr, problem.vm)
+    return tasks.destroy_problem(problem)
 
 
 def _task_from_slug(action, vm_slug, vm_db=None, **kwargs):

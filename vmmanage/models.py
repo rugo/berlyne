@@ -84,6 +84,11 @@ class Problem(models.Model):
         problem.assign_vm(config)
         return problem
 
+    def destroy(self):
+        if self.vm:
+            self.get_vagrant().destroy()
+        self.delete()
+
     @property
     def vm(self):
         """
