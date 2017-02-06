@@ -344,14 +344,14 @@ def course_manage_problems(request, course_slug):
         if form.is_valid():
             new_problems = form.cleaned_data['problems']
 
-            removed_problems = models.CourseProblems.objects.filter(
+            removed_cprobs = models.CourseProblems.objects.filter(
                 course=course,
                 problem__virtualmachine__isnull=False
             ).exclude(problem__in=new_problems)
 
-            vm_views.stop_unused_vms([p.problem.vm for p in removed_problems])
-
-            removed_problems.delete()
+            problems = [c.problem for c in removed_cprobs]
+            removed_cprobs.delete()
+            vm_views.stop_unused_vms(problems)
 
             for problem in new_problems:
                 models.CourseProblems.objects.update_or_create(

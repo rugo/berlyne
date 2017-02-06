@@ -43,12 +43,12 @@ def start_used_vms(vms=None):
     deploy_controller.vm_action_on_states(settings.DEFAULT_USED_ACTION, VAGRANT_STOPPED_STATES, vms)
 
 
-def stop_unused_vms(vms):
+def stop_unused_vms(problems):
     # Check if really unused
     unused_vms = []
-    for vm in vms:
-        if not vm.course_set.exists():
-            unused_vms.append(vm)
+    for problem in problems:
+        if problem.vm and not problem.course_set.exists():
+            unused_vms.append(problem.vm)
     if unused_vms:
         deploy_controller.vm_action_on_states(settings.DEFAULT_UNUSED_ACTION, VAGRANT_RUNNING_STATES, unused_vms)
 
@@ -109,14 +109,11 @@ def install_problem(request):
         problem_name = request.POST['problem']
         try:
             deploy_controller.create_problem(problem_name, vagr_name)
-        except (OSError, IntegrityError) as ex:
-            print(ex)
+        except (OSError, IntegrityError):
             return redirect(reverse('vmmanage_show_installable') + '?m=exists')
-        except ValueError as ex:
-            print(ex)
+        except ValueError:
             return redirect(reverse('vmmanage_show_installable') + '?m=invalidconfig')
-        except KeyError as ex:
-            print(ex)
+        except KeyError:
             return redirect(reverse('vmmanage_show_installable') + "?m=missingkey")
     else:
         return redirect(reverse('vmmanage_show_installable') + '?m=formerror')
