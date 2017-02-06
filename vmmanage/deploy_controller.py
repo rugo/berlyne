@@ -14,10 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from glob import glob
-from http.client import (
-    OK as HTTP_OK,
-    NOT_FOUND as HTTP_NOT_FOUND
-)
 from os import path
 
 from django.conf import settings
@@ -34,18 +30,16 @@ from .models import (
 __AVAIL_VAGR_FILES = []
 
 
+class IllegalAction(ValueError):
+    pass
+
+
 def get_avail_vagrant_files():
     if not __AVAIL_VAGR_FILES:
         for p in glob(path.join(settings.VAGR_VAGRANT_PATH, '*')):
             if path.isfile(p):
                 __AVAIL_VAGR_FILES.append(path.split(p)[-1])
     return __AVAIL_VAGR_FILES
-
-
-def task_dict_success(task):
-    return {
-        'task_id': task.pk
-    }, HTTP_OK
 
 
 def install_deployment(vagr_depl: Deployment.Vagrant, vm):
@@ -89,19 +83,7 @@ def create_problem(problem_slug, vagrant_name):
 
 def destroy_problem(problem):
     vagr = vagr_factory(problem.slug)
-    return task_dict_success(tasks.destroy_problem(vagr, problem.vm))
-
-
-def destroy_deployment_db(vm):
-    tasks.destroy_vm_db(vm)
-    return "Deleted from db", HTTP_OK
-
-
-def destroy_deployment_fs(vm_slug):
-    return task_dict_success(models.Task.from_slug(
-        'destroy',
-        vm_slug)
-    )
+    return tasks.destroy_problem(vagr, problem.vm)
 
 
 def _task_from_slug(action, vm_slug, vm_db=None, **kwargs):
@@ -111,10 +93,10 @@ def _task_from_slug(action, vm_slug, vm_db=None, **kwargs):
 
 def run_on_existing(action, vm_obj, **kwargs):
     if action not in LEGAL_API_VM_ACTIONS:
-        return "Action is not defined", HTTP_NOT_FOUND
+        raise IllegalAction("Illegal action '{}'".format(action))
     t = _task_from_slug(action, vm_obj.problem.slug, vm_obj, **kwargs)
     vm_obj.add_task(t, action)
-    return task_dict_success(t)
+    return t
 
 
 # Todo: make cheaper
