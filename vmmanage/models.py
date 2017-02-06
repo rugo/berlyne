@@ -81,7 +81,7 @@ class Problem(models.Model):
         problem.save()
         problem.assign_tags(config['tags'])
         problem.assign_downloads(config.get('downloads', {}))
-        problem.assign_vm(config)
+        problem.assign_vm(config.get('ports', []))
         return problem
 
     def destroy(self):
@@ -111,8 +111,7 @@ class Problem(models.Model):
             raise ValueError("A download only challenge MUST "
                              "contain a flag in it's meta data!")
 
-    def assign_vm(self, config):
-        ports = config.get('ports', [])
+    def assign_vm(self, ports):
         # In case ports are defined, we need a VM
         if ports:
             vm = VirtualMachine.objects.create(problem=self)
