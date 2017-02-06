@@ -85,6 +85,12 @@ class Problem(models.Model):
         return problem
 
     def destroy(self):
+        """
+        Destroy the problem. This takes into consideration if the problem uses
+        a VM. In case it does, the vagrant instance will be destroyed.
+        This method is **blocking**! It should only be called asynchronously
+        since interaction with Vagrant is pretty slow.
+        """
         if self.vm:
             self.get_vagrant().destroy()
         self.delete()
