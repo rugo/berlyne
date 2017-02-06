@@ -11,6 +11,7 @@
               <tr>
                 <th>{% trans 'Slug' %}</th>
                 <th>{% trans 'Name' %}</th>
+                <th>{% trans 'Type' %}</th>
                 <th>{% trans 'State' %}</th>
                 <th>{% trans 'Last Task' %}</th>
               </tr>
@@ -21,6 +22,7 @@
                         <td><a href="{% url "vmmanage_detail_problem" problem.slug %}">{{ problem.slug }}</a></td>
                         <td>{{ problem.name }}</td>
                           {% if problem.vm %}
+                            <td>{% trans "VM" %}</td>
                             <td class="{{ problem.vm.state_set.latest.name|state_css_class }}">
                                 {{ problem.vm.state_set.latest }}
                             </td>
@@ -28,8 +30,9 @@
                                 {{ problem.vm.task_set.latest }}
                             </td>
                           {% else %}
-                              <td>{% trans "DL only" %}</td>
-                              <td>{% trans "DL only" %}</td>
+                              <td>{% trans "Download" %}</td>
+                              <td></td>
+                              <td></td>
                           {% endif %}
                       </tr>
             {% endfor %}

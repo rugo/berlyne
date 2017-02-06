@@ -20,8 +20,8 @@ from . import models
 
 
 class VagrantFilesForm(Form):
-    vagrant_file = ChoiceField(label="Deployment",
-        choices=[(x, x)for x in deploy_controller.get_avail_vagrant_files()],
+    vagrant_file = ChoiceField(label="VM deployment",
+        choices=[(x, x)for x in deploy_controller.get_avail_vagrant_files()]
     )
 
 

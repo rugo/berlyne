@@ -128,7 +128,7 @@ def problem_overview(request):
         request,
         "vms/overview.html",
         {
-            "problems": models.Problem.objects.all(),
+            "problems": models.Problem.objects.all()
         }
     )
 
