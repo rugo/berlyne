@@ -132,8 +132,12 @@ def course_show(request, course_slug):
 @permission_required('can_manage_course')
 def course_delete(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    vm_views.stop_unused_vms(course.problems.all())
+    # If we use the "problems" attribute here, the QuerySet is empty
+    # after deleting the course. Uncool!
+    course_probs = course.courseproblems_set.all()
+    problems = [p.problem for p in course_probs]
     course.delete()
+    vm_views.stop_unused_vms(problems)
     return redirect(reverse('wui_courses') + "?m=deleted")
 
 
