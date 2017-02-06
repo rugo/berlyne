@@ -521,7 +521,8 @@ def show_writeup(request, course_slug, problem_name, user_name):
 
 def _download_wrapped_file(download):
     download_path = download.abspath
-    if not path.exists(download_path):
+    # We do not allow symlinks as downloads for security reasons
+    if not path.exists(download_path) or path.islink(download_path):
         return HttpResponse("Download not found", status=HTTP_NOT_FOUND)
     wrapper = FileWrapper(open(download_path, "rb"))
     response = HttpResponse(wrapper, content_type='application/force-download')
