@@ -38,7 +38,7 @@ config.vm.synced_folder "content", "/opt", type: "rsync", owner: "root", group: 
             override.vm.box_url = "https://github.com/devopsgroup-io/vagrant-digitalocean/raw/master/box/digital_ocean.box"
             override.nfs.functional = false 
             provider.image = 'ubuntu-14-04-x32'
-            provider.token = "df21e5d1327c79d0b9d0d6dfeca135079618ec340f462264a7b15f7ab08ba493"
+            provider.token = File.read("/home/rg/.do_api_key") # Replace with D.o. API key!
             provider.region = 'fra1'
             provider.size = '512mb'
         end
