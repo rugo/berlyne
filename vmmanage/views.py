@@ -43,14 +43,22 @@ def start_used_vms(vms=None):
     deploy_controller.vm_action_on_states(settings.DEFAULT_USED_ACTION, VAGRANT_STOPPED_STATES, vms)
 
 
-def stop_unused_vms(problems):
+def stop_unused_vms(vms):
     # Check if really unused
     unused_vms = []
-    for problem in problems:
-        if problem.vm and not problem.course_set.exists():
-            unused_vms.append(problem.vm)
+    for vm in vms:
+        if not vm.problem.courseproblems_set.exists():
+            unused_vms.append(vm)
     if unused_vms:
         deploy_controller.vm_action_on_states(settings.DEFAULT_UNUSED_ACTION, VAGRANT_RUNNING_STATES, unused_vms)
+
+
+def stop_unused_problems(problems):
+    vms = []
+    for problem in problems:
+        if problem.vm:
+            vms.append(problem.vm)
+    stop_unused_vms(vms)
 
 
 def _run_task_on_existing_vm(action, problem_slug, **kwargs):

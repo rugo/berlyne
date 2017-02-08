@@ -137,7 +137,7 @@ def course_delete(request, course_slug):
     course_probs = course.courseproblems_set.all()
     problems = [p.problem for p in course_probs]
     course.delete()
-    vm_views.stop_unused_vms(problems)
+    vm_views.stop_unused_problems(problems)
     return redirect(reverse('wui_courses') + "?m=deleted")
 
 
@@ -349,13 +349,12 @@ def course_manage_problems(request, course_slug):
             new_problems = form.cleaned_data['problems']
 
             removed_cprobs = models.CourseProblems.objects.filter(
-                course=course,
-                problem__virtualmachine__isnull=False
+                course=course
             ).exclude(problem__in=new_problems)
 
             problems = [c.problem for c in removed_cprobs]
             removed_cprobs.delete()
-            vm_views.stop_unused_vms(problems)
+            vm_views.stop_unused_problems(problems)
 
             for problem in new_problems:
                 models.CourseProblems.objects.update_or_create(
