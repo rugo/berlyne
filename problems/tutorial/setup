@@ -1,7 +1,6 @@
 #!/bin/bash
 
 export DEBIAN_FRONTEND=noninteractive
-CONTENT_DIR=/opt
 
 apt-get install -y apache2
 
