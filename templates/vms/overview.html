@@ -11,6 +11,7 @@
               <tr>
                 <th>{% trans 'Slug' %}</th>
                 <th>{% trans 'Name' %}</th>
+                <th>{% trans 'Type' %}</th>
                 <th>{% trans 'State' %}</th>
                 <th>{% trans 'Last Task' %}</th>
               </tr>
@@ -20,8 +21,19 @@
                       <tr>
                         <td><a href="{% url "vmmanage_detail_problem" problem.slug %}">{{ problem.slug }}</a></td>
                         <td>{{ problem.name }}</td>
-                        <td class="{{ problem.state_set.latest.name|state_css_class }}">{{ problem.state_set.latest }}</td>
-                        <td class="{{ problem.task_set.latest.task.status|task_css_class }}">{{ problem.task_set.latest }}</td>
+                          {% if problem.vm %}
+                            <td>{{ problem.vm.provider.capitalize }} {% trans "VM" %}</td>
+                            <td class="{{ problem.vm.state_set.latest.name|state_css_class }}">
+                                {{ problem.vm.state_set.latest }}
+                            </td>
+                            <td class="{{ problem.vm.task_set.latest.task.status|task_css_class }}">
+                                {{ problem.vm.task_set.latest }}
+                            </td>
+                          {% else %}
+                              <td>{% trans "Download" %}</td>
+                              <td></td>
+                              <td></td>
+                          {% endif %}
                       </tr>
             {% endfor %}
     </table>

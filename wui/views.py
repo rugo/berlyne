@@ -13,20 +13,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, permission_required
-from django.conf import settings
-from django.http import HttpResponse
 from http.client import NOT_FOUND as HTTP_NOT_FOUND
-from . import models
-from vmmanage.models import Download, UNKNOWN_HOST
-from vmmanage import views as vm_views
 from os import path
 from wsgiref.util import FileWrapper
-from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
-from django.urls import reverse
-from .forms import *
+
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db import IntegrityError
 from django.db.models import (
     Sum,
@@ -34,11 +25,28 @@ from django.db.models import (
     Case,
     When,
     F,
-    IntegerField,
-    Value
+    Value,
+    IntegerField
 )
-from uptomate.Provider import LOCALHOST
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
+from vmmanage import views as vm_views
+from vmmanage.models import Download
+from . import models
+from .forms import (
+    UserForm,
+    CourseForm,
+    CoursePwForm,
+    AddProbForm,
+    PointToProbForm,
+    SubmissionForm,
+    WriteupForm,
+    UserEmailCreateForm,
+)
 
 DOWNLOAD_FNAME_TEMLATE = "{problem_slug}_{download_pk}_{filename}"
 MESSAGES = {
@@ -124,8 +132,12 @@ def course_show(request, course_slug):
 @permission_required('can_manage_course')
 def course_delete(request, course_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    vm_views.stop_unused_vms(course.problems.all())
+    # If we use the "problems" attribute here, the QuerySet is empty
+    # after deleting the course. Uncool!
+    course_probs = course.courseproblems_set.all()
+    problems = [p.problem for p in course_probs]
     course.delete()
+    vm_views.stop_unused_problems(problems)
     return redirect(reverse('wui_courses') + "?m=deleted")
 
 
@@ -336,19 +348,25 @@ def course_manage_problems(request, course_slug):
         if form.is_valid():
             new_problems = form.cleaned_data['problems']
 
-            removed_problems = models.CourseProblems.objects.filter(
+            removed_cprobs = models.CourseProblems.objects.filter(
                 course=course
             ).exclude(problem__in=new_problems)
 
-            vm_views.stop_unused_vms([r.problem for r in removed_problems])
-
-            removed_problems.delete()
+            problems = [c.problem for c in removed_cprobs]
+            removed_cprobs.delete()
+            vm_views.stop_unused_problems(problems)
 
             for problem in new_problems:
                 models.CourseProblems.objects.update_or_create(
                     course=course, problem=problem, defaults={'points': problem.default_points}
                 )
-            vm_views.start_used_vms(new_problems)
+
+            new_problem_vms = []
+            for p in new_problems:
+                if p.vm:
+                    new_problem_vms.append(p.vm)
+
+            vm_views.start_used_vms(new_problem_vms)
             return redirect(reverse('wui_points_to_problems',
                                     kwargs={'course_slug': course_slug}))
         else:
@@ -506,7 +524,8 @@ def show_writeup(request, course_slug, problem_name, user_name):
 
 def _download_wrapped_file(download):
     download_path = download.abspath
-    if not path.exists(download_path):
+    # We do not allow symlinks as downloads for security reasons
+    if not path.exists(download_path) or path.islink(download_path):
         return HttpResponse("Download not found", status=HTTP_NOT_FOUND)
     wrapper = FileWrapper(open(download_path, "rb"))
     response = HttpResponse(wrapper, content_type='application/force-download')

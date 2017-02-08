@@ -51,15 +51,14 @@ UNKNOWN_HOST = "*unknown*"
 DEFAULT_TASK_NAME = "unnamed_task"
 TASK_STATUS_NAMES = dict(task_models.STATUS_CHOICES)
 
-# Get an instance of a logger
+
 logger = logging.getLogger(__name__)
 
-class VirtualMachine(models.Model):
+
+class Problem(models.Model):
     slug = models.SlugField(unique=True)
     name = models.CharField(_("name"), max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    ip_addr = models.CharField(_("IP Address"), max_length=45)
-    provider = models.CharField(max_length=255)
 
     # Attrs used from config
     desc = models.TextField(_("description"), max_length=1024)
@@ -67,16 +66,168 @@ class VirtualMachine(models.Model):
     flag = models.CharField(max_length=255)
     default_points = models.PositiveSmallIntegerField(default=0)
 
-    # This should only be modified using the
-    # lock() and unlock() method
-    locked = models.BooleanField(default=False)
-
     # Stores config of problem running on this machine
     __vagr_config = None
     __vagr_instance = None
 
     class Meta:
         ordering = ("slug", )
+
+    @classmethod
+    def create(cls, slug, name, config):
+        cls.check_config(config)
+        problem = cls(slug=slug, name=name)
+        problem.set_basic_config(config)
+        problem.save()
+        problem.assign_tags(config['tags'])
+        problem.assign_downloads(config.get('downloads', {}))
+        problem.assign_vm(config.get('ports', []))
+        return problem
+
+    def destroy(self):
+        """
+        Destroy the problem. This takes into consideration if the problem uses
+        a VM. In case it does, the vagrant instance will be destroyed.
+        This method is **blocking**! It should only be called asynchronously
+        since interaction with Vagrant is pretty slow.
+        """
+        if self.vm:
+            self.get_vagrant().destroy()
+        self.delete()
+
+    @property
+    def vm(self):
+        """
+        :return: Associated VM or None if problem is DL_only
+        """
+        return self.virtualmachine_set.first()
+
+    @staticmethod
+    def check_config(config):
+        flag = config.get('flag', '')
+        ports = config.get('ports', [])
+
+        if not flag and not ports:
+            raise ValueError("A download only challenge MUST "
+                             "contain a flag in it's meta data!")
+
+    def assign_vm(self, ports):
+        # In case ports are defined, we need a VM
+        if ports:
+            vm = VirtualMachine.objects.create(problem=self)
+            vm.assign_ports(ports)
+            self.virtualmachine_set.add(vm)
+
+    def assign_tags(self, tags):
+        for t in tags:
+            self.tag_set.add(Tag.objects.update_or_create(name=t)[0])
+
+    def assign_downloads(self, downloads):
+        for slug, d in downloads.items():
+            if not slug.isalnum():
+                raise ValueError(
+                    "Download slug '{}' is not alphanumeric.".format(
+                        slug
+                    )
+                )
+            self.download_set.add(
+                Download.objects.create(
+                    slug=slug,
+                    problem=self,
+                    path=self.get_vagrant().normalize_dl_path(
+                        d
+                    )
+                )
+            )
+
+    def set_basic_config(self, config):
+        self.name = config['name']
+        self.desc = config['desc']
+        self.category = config['category']
+        self.default_points = config['points']
+        self.assign_flag(config.get('flag', ''))
+
+    def assign_flag(self, flag):
+        """
+        Assigns flag or creates one if flag is empty.
+        :return: flag that was set
+        """
+        if not flag:
+            flag = Problem.create_random_flag()
+        self.flag = flag
+        return flag
+
+    @staticmethod
+    def create_random_flag():
+        return RANDOM_FLAG_TEMPLATE.format(
+            "".join(
+                [rand_choice(RANDOM_FLAG_CHARS) for _ in range(RANDOM_FLAG_LEN)]
+            )
+        )
+
+    def parse_desc(self):
+        ctx = {}
+
+        for download in self.download_set.all():
+            ctx['DL_{}'.format(download.slug)] = reverse(
+                'wui_download_file',
+                kwargs={'download_id': download.pk}
+            )
+
+        vm = self.vm
+        if vm:
+            if not vm.provider or vm.ip_addr == UNKNOWN_HOST:
+                return None
+
+            if vm.ip_addr == LOCALHOST:
+                ctx['HOST'] = settings.DOMAIN
+            else:
+                ctx['HOST'] = vm.ip_addr
+
+            try:
+                provider = ALLOWED_PROVIDERS[vm.provider]
+            except KeyError:
+                logger.warning(
+                    "Illegal provider '%s' used in VM %s",
+                    vm.provider, vm.slug
+                )
+                return None
+
+            for port in vm.port_set.all():
+                if provider.port_forwarding:
+                    ctx['PORT_{}'.format(port.guest_port)] = port.host_port
+                else:
+                    ctx['PORT_{}'.format(port.guest_port)] = port.guest_port
+        return self.desc.format_map(defaultdict(str, **ctx))
+
+    def get_vagrant(self):
+        if not self.__vagr_instance:
+            self.__vagr_instance = vagr_factory(self.slug)
+        return self.__vagr_instance
+
+    def __get_problem_config(self):
+        if not self.__vagr_config:
+            self.__vagr_config = self.get_vagrant().get_config()
+        return self.__vagr_config.copy()
+
+    def get_problem_config(self):
+        return self.__get_problem_config()
+
+    def __str__(self):
+        return "{}[{}] ({}) - {}".format(
+            self.name, self.default_points, self.category,
+            ",".join([str(t) for t in self.tag_set.all()])
+        )
+
+
+class VirtualMachine(models.Model):
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    ip_addr = models.CharField(_("IP Address"), max_length=45)
+    provider = models.CharField(max_length=255)
+
+    # This should only be modified using the
+    # lock() and unlock() method
+    locked = models.BooleanField(default=False)
 
     def predict_state(self):
         """
@@ -118,84 +269,20 @@ class VirtualMachine(models.Model):
         self.locked = False
         self.save()
 
-    def get_vagrant(self):
-        if not self.__vagr_instance:
-            self.__vagr_instance = vagr_factory(self.slug)
-        return self.__vagr_instance
-
-    def __get_problem_config(self):
-        if not self.__vagr_config:
-            self.__vagr_config = self.get_vagrant().get_config()
-        return self.__vagr_config.copy()
-
-    def get_problem_config(self):
-        return self.__get_problem_config()
-
-    def add_task(self, task, task_name=None):
-        self.task_set.add(Task.create(self, task, task_name), bulk=False)
-
-    def set_align_config(self, config):
-        config['ports'] = self.__assign_ports(config['ports'])
-        self.name = config['name']
-        self.desc = config['desc']
-        self.category = config['category']
-        self.default_points = config['points']
-        config['flag'] = self.assign_flag(config.get('flag', ''))
-
-        self.save()
-
-        for t in config['tags']:
-            self.tag_set.add(Tag.objects.update_or_create(name=t)[0])
-
-        if 'downloads' in config:
-            for slug, d in config['downloads'].items():
-                if not slug.isalnum():
-                    raise ValueError(
-                        "Download slug '{}' is not alphanumeric.".format(
-                            slug
-                        )
-                    )
-                self.download_set.add(
-                    Download.objects.create(
-                        slug=slug,
-                        problem=self,
-                        path=self.get_vagrant().normalize_content_path(
-                            d
-                        )
-                    )
-                )
-        return config
-
-    def has_task_in_queue(self, task_name):
-        return self.task_set.filter(
-                task_status__in=[task_models.WAITING, task_models.RUNNING]
-        ).filter(
-            task_name=task_name
-        ).exists()
-
-    @property
-    def is_running(self):
-        return self.state_set.latest().name in Deployment.VAGRANT_RUNNING_STATES
-
-    def assign_flag(self, flag):
+    def get_port_list(self):
         """
-        Assigns flag or creates one if flag is empty.
-        :return: flag that was set
+        :return: JSON dumpable list of ports
         """
-        if not flag:
-            flag = VirtualMachine.create_random_flag()
-        self.flag = flag
-        return flag
+        return [
+            {
+                'host': port.host_port,
+                'desc': port.description,
+                'guest': port.guest_port
+            }
+            for port in self.port_set.all()
+        ]
 
-    @staticmethod
-    def create_random_flag():
-        return RANDOM_FLAG_TEMPLATE.format(
-            "".join(
-                [rand_choice(RANDOM_FLAG_CHARS) for _ in range(RANDOM_FLAG_LEN)]
-            )
-        )
-
-    def __assign_ports(self, ports):
+    def assign_ports(self, ports):
         for port in ports:
             with transaction.atomic():
                 if not port['host']:
@@ -208,51 +295,30 @@ class VirtualMachine(models.Model):
                 )
         return ports
 
-    def parse_desc(self):
-        if not self.provider or self.ip_addr == UNKNOWN_HOST:
-            return None
-        ctx = {
-            'HOST': settings.DOMAIN if self.ip_addr == LOCALHOST else self.ip_addr
-        }
+    def add_task(self, task, task_name=None):
+        self.task_set.add(Task.create(self, task, task_name), bulk=False)
 
-        try:
-            provider = ALLOWED_PROVIDERS[self.provider]
-        except KeyError:
-            logger.warning(
-                "Illegal provider '%s' used in VM %s",
-                self.provider, self.slug
-            )
-            return None
+    def has_task_in_queue(self, task_name):
+        return self.task_set.filter(
+                task_status__in=[task_models.WAITING, task_models.RUNNING]
+        ).filter(
+            task_name=task_name
+        ).exists()
 
-        for port in self.port_set.all():
-            if provider.port_forwarding:
-                ctx['PORT_{}'.format(port.guest_port)] = port.host_port
-            else:
-                ctx['PORT_{}'.format(port.guest_port)] = port.guest_port
-
-        for download in self.download_set.all():
-            ctx['DL_{}'.format(download.slug)] = reverse(
-                'wui_download_file',
-                kwargs={'download_id': download.pk}
-            )
-        return self.desc.format_map(defaultdict(str, **ctx))
-
-    def __str__(self):
-        return "{}[{}] ({}) - {}".format(
-            self.name, self.default_points, self.category,
-            ",".join([str(t) for t in self.tag_set.all()])
-        )
+    @property
+    def is_running(self):
+        return self.state_set.latest().name in Deployment.VAGRANT_RUNNING_STATES
 
 
 class Download(models.Model):
     slug = models.SlugField()
-    problem = models.ForeignKey(VirtualMachine)
+    problem = models.ForeignKey(Problem)
     path = models.CharField(max_length=4096)
 
     @property
     def abspath(self):
         vagr = self.problem.get_vagrant()
-        return vagr.normalize_content_path(
+        return vagr.normalize_dl_path(
             self.path,
             absolut=True
         )
@@ -265,7 +331,7 @@ class Download(models.Model):
 
 class Tag(models.Model):
     name = models.SlugField(_("name"), unique=True)
-    vm = models.ManyToManyField(VirtualMachine)
+    problem = models.ManyToManyField(Problem)
 
     def __str__(self):
         return self.name
@@ -292,7 +358,7 @@ class Port(models.Model):
         return p
 
     def __str__(self):
-        return "{}->{}:{}".format(self.host_port, self.vm.slug, self.guest_port)
+        return "{}->{}:{}".format(self.host_port, self.vm.problem.slug, self.guest_port)
 
 
 class State(models.Model):

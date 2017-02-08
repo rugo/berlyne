@@ -42,7 +42,7 @@ class Course(models.Model):
     deadline = models.DateTimeField(_("submission deadline"))
 
     # instances of problems (VMs)
-    problems = models.ManyToManyField(vmmanage.models.VirtualMachine,
+    problems = models.ManyToManyField(vmmanage.models.Problem,
                                       through='CourseProblems')
 
     writeups = models.BooleanField(_("activate write ups"))
@@ -71,7 +71,7 @@ class Course(models.Model):
 class CourseProblems(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     problem = models.ForeignKey(
-        vmmanage.models.VirtualMachine,
+        vmmanage.models.Problem,
         on_delete=models.CASCADE
     )
     points = models.IntegerField()

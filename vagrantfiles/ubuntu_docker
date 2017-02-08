@@ -21,10 +21,9 @@ Vagrant.configure('2') do |config|
   
     config.vm.define $slug do |config|
         config.vm.synced_folder ".", "/vagrant", disabled: true
-        config.vm.synced_folder "content", "/opt", type: "rsync", owner: "root", group: "root",
-        rsync__args: ["--verbose", "-r", "--delete", "--copy-links", "--chmod=D775,F664",],
-        rsync__exclude: "dl_only/"
-        config.vm.provision :shell, path: "../setup"
+        config.vm.synced_folder "content", "/opt", type: "rsync", owner: "root", group: "root", rsync__args: ["-r", "--chmod=D775,F664",]
+        config.vm.synced_folder "../content", "/opt/problem", type: "rsync", owner: "root", group: "root", rsync__args: ["-r", "--delete", "--chmod=D775,F664"], rsync__exclude: "dl_only/"
+        config.vm.provision :shell, path: "../setup", env: {"CONTENT_DIR" => "/opt/problem"}
 
         config.vm.network :forwarded_port, guest: 22, host: 2200, host_ip: "127.0.0.1",
         auto_correct: true, id: 'ssh'

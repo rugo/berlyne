@@ -6,9 +6,9 @@
     <h3> {{ sub.user }} {% if sub.user.last_name %}({{ sub.user.last_name }}){% endif %} {% trans "about" %} {{ sub.problem.problem.name }}</h3>
     <p>
         {% if sub.writeup %}
-            <pre>
-                {{ sub.writeup.strip }}
-            </pre>
+            <div style="text-align: left">
+                <pre>{{ sub.writeup.strip }}</pre>
+            </div>
         {% else %}
             {% trans "The user submitted an empty writeup" %}
         {% endif %}
