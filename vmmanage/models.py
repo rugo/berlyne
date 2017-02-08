@@ -198,7 +198,6 @@ class Problem(models.Model):
                     ctx['PORT_{}'.format(port.guest_port)] = port.host_port
                 else:
                     ctx['PORT_{}'.format(port.guest_port)] = port.guest_port
-        print(ctx)
         return self.desc.format_map(defaultdict(str, **ctx))
 
     def get_vagrant(self):
