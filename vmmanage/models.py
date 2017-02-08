@@ -173,13 +173,16 @@ class Problem(models.Model):
                 'wui_download_file',
                 kwargs={'download_id': download.pk}
             )
+
         vm = self.vm
         if vm:
             if not vm.provider or vm.ip_addr == UNKNOWN_HOST:
                 return None
-            ctx = {
-                'HOST': settings.DOMAIN if vm.ip_addr == LOCALHOST else vm.ip_addr
-            }
+
+            if vm.ip_addr == LOCALHOST:
+                ctx['HOST'] = settings.DOMAIN
+            else:
+                ctx['HOST'] = vm.ip_addr
 
             try:
                 provider = ALLOWED_PROVIDERS[vm.provider]
@@ -195,7 +198,7 @@ class Problem(models.Model):
                     ctx['PORT_{}'.format(port.guest_port)] = port.host_port
                 else:
                     ctx['PORT_{}'.format(port.guest_port)] = port.guest_port
-
+        print(ctx)
         return self.desc.format_map(defaultdict(str, **ctx))
 
     def get_vagrant(self):
