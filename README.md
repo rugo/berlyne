@@ -39,7 +39,7 @@ Tasks can be shared via repository/download/usb stick/whatever, since they only 
 [three files](https://github.com/rugo/berlyne/wiki/Creating-Problems).
 
 Tasks shared by membes of the community are listed in the
-[Berlyne Problems Blockchain](problems_blockchain.txt). 
+[Problems Wiki Page](https://github.com/rugo/berlyne/wiki/Problem-list). 
 
 On how to install them, please consult the [wiki](https://github.com/rugo/berlyne/wiki/Installing-Problems).
 
