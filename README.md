@@ -14,6 +14,8 @@ All that is done via a Web UI.
 
 The platform is ready to be worked with, but is also still under heavy construction.
 
+Check out the live demo [here](https://demo.berlyne.wass-ctf.xyz)!
+
 ## Requirements
 
 The current Version **0.1** is tested with **Python 3.4** and **Django 1.10** on Debian but should also work
