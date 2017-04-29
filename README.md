@@ -14,7 +14,11 @@ All that is done via a Web UI.
 
 The platform is ready to be worked with, but is also still under heavy construction.
 
+## Live Demo
+
 Check out the live demo [here](https://demo.berlyne.wass-ctf.xyz)!
+Just register an account and join the course _Example_.
+The given email adress is not used in any way except for the "Lost Password" function.
 
 ## Requirements
 
