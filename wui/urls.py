@@ -37,12 +37,12 @@ urlpatterns = [
             url(r'^join_pw/$', views.course_join_pw, name='wui_course_join_pw'),
             url(r'^leave/$', views.course_leave, name='wui_course_leave'),
             url(r'^problems/$', views.course_problems, name='wui_course_problems'),
-            url(r'^problem_writeup/(?P<problem_slug>[\w-]+)/$', views.writeup, name='wui_course_problem_writeup'),
+            url(r'^problem_writeup/(?P<problem_slug>[\w.,-]+)/$', views.writeup, name='wui_course_problem_writeup'),
             url(r'^scoreboard/$', views.course_scoreboard, name='wui_course_scoreboard'),
             url(r'^manage_problems/$', views.course_manage_problems, name='wui_course_manage_problems'),
             url(r'^manage_points/$', views.course_manage_points, name='wui_points_to_problems'),
             url(r'^writeups/$', views.course_writeups, name='wui_course_writeups'),
-            url(r'^writeups/(?P<problem_name>[\w-]+)/(?P<user_name>[\w-]+)/$', views.show_writeup, name='wui_course_writeup_show')
+            url(r'^writeups/(?P<problem_name>[\w.,-]+)/(?P<user_name>[\w.,-]+)/$', views.show_writeup, name='wui_course_writeup_show')
         ]
     )),
     url(r'^downloads/(?P<download_id>[\w-]+)/$', views.download_file, name='wui_download_file'),
