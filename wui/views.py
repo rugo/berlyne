@@ -486,6 +486,11 @@ def course_writeups(request, course_slug):
         'creation_time'
     )
 
+    username = request.GET.get('user', '')
+
+    if username:
+        submissions = submissions.filter(user__username=username)
+
     errors = []
 
     if not course.writeups:
