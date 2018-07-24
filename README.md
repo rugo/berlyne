@@ -16,7 +16,7 @@ The platform is ready to be worked with, but is also still under heavy construct
 
 ## Live Demo
 
-Check out the live demo [here](https://demo.berlyne.wass-ctf.xyz)!
+Check out the live demo [here](https://hack.redrocket.club)!
 
 Just register an account and join the course _Example_.
 
