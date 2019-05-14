@@ -26,7 +26,8 @@ from django.db.models import (
     When,
     F,
     Value,
-    IntegerField
+    IntegerField,
+    Q
 )
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -312,7 +313,7 @@ def course_scoreboard(request, course_slug):
         point_sum=Sum(
             Case(
                 When(
-                    submission__correct=True,
+                    Q(submission__correct=True) & Q(submission__problem__course__name=course_slug),
                     then=F('submission__problem__points'),
                 ),
                 default=Value(0),
