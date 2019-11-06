@@ -16,6 +16,7 @@
 from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from os import path
 from wsgiref.util import FileWrapper
+import markdown
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import IntegrityError
@@ -201,8 +202,8 @@ def _course_problem_dict(course, user):
             'title': course_prob.problem.name,
             'slug': course_prob.problem.slug,
             'points': course_prob.points,
-            'desc': course_prob.problem.parse_desc() or
-                        MESSAGES['problem_not_ready'],
+            'desc': markdown.markdown(course_prob.problem.parse_desc() or
+                        MESSAGES['problem_not_ready']),
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
             ),
@@ -424,8 +425,6 @@ def course_manage_points(request, course_slug):
 @login_required()
 def writeup(request, course_slug, problem_slug):
     course = get_object_or_404(models.Course, name=course_slug)
-    if course.has_ended or not course.has_begun:
-        return redirect('wui_course_show', kwargs={"course_slug": course_slug})
     submission = get_object_or_404(
         models.Submission,
         problem__problem__slug=problem_slug,
@@ -439,6 +438,8 @@ def writeup(request, course_slug, problem_slug):
     form = WriteupForm(instance=submission)
 
     if request.POST:
+        if course.has_ended or not course.has_begun:
+            return redirect(reverse('wui_course_show', kwargs={"course_slug": course_slug}))
         form = WriteupForm(request.POST, instance=submission)
         if form.is_valid():
             form.save()
@@ -486,6 +487,11 @@ def course_writeups(request, course_slug):
         'problem__problem__slug',
         'creation_time'
     )
+
+    username = request.GET.get('user', '')
+
+    if username:
+        submissions = submissions.filter(user__username=username)
 
     errors = []
 
