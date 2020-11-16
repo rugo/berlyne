@@ -1,5 +1,5 @@
 django==2.2.17
 autotask
-psycopg2
+psycopg2-binary
 markdown
-git+https://gitlab.com/rugo/uptomate-re.git
+git+https://git.fslab.de/rgonza2s/uptomate-dc.git

@@ -35,10 +35,6 @@ class IllegalAction(ValueError):
 
 
 def get_avail_vagrant_files():
-    if not __AVAIL_VAGR_FILES:
-        for p in glob(path.join(settings.VAGR_VAGRANT_PATH, '*')):
-            if path.isfile(p):
-                __AVAIL_VAGR_FILES.append(path.split(p)[-1])
     return __AVAIL_VAGR_FILES
 
 
@@ -46,9 +42,9 @@ def install_deployment(vagr_depl: Deployment.Vagrant, vm):
     if isinstance(vm, str):
         vm = models.VirtualMachine.objects.get(slug=vm)
 
-    vagr_depl.set_ports(vm.get_port_list())
-    with vagr_depl.open_content_file(FLAG_FILE_NAME) as f:
-        f.write(vm.problem.flag)
+    # vagr_depl.set_ports(vm.get_port_list())
+    # with vagr_depl.open_content_file(FLAG_FILE_NAME) as f:
+    #     f.write(vm.problem.flag)
 
 
 def _install_deployment_callback(vagr_depl, f, vm_db, **kwargs):

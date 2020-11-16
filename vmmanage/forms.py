@@ -21,7 +21,7 @@ from . import models
 
 class VagrantFilesForm(Form):
     vagrant_file = ChoiceField(label="VM deployment",
-        choices=[(x, x)for x in deploy_controller.get_avail_vagrant_files()]
+        choices=[("docker-compose", "docker-compose")]
     )
 
 

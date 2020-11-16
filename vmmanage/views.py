@@ -119,7 +119,7 @@ def install_problem(request):
             deploy_controller.create_problem(problem_name, vagr_name)
         except (OSError, IntegrityError):
             return redirect(reverse('vmmanage_show_installable') + '?m=exists')
-        except ValueError:
+        except ValueError as ex:
             return redirect(reverse('vmmanage_show_installable') + '?m=invalidconfig')
         except KeyError:
             return redirect(reverse('vmmanage_show_installable') + "?m=missingkey")

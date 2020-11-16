@@ -1,5 +1,10 @@
 version: "3.8"
 
+x-task:
+  desc: Hans Peter
+  points: 500
+  lol: 1337
+
 services:
   db:
     image: postgres
@@ -7,12 +12,14 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-  web:
-    build: .
-    command: "bash -c 'python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000'"
-    volumes:
-      - .:/code
     ports:
-      - "8000:8000"
-    depends_on:
-      - db
+      - "5432:5432"
+#  web:
+#    build: .
+#    command: "bash -c 'python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000'"
+#    volumes:
+#      - .:/code
+#    ports:
+#      - "8000:8000"
+#    depends_on:
+#      - db

@@ -56,8 +56,8 @@ def run_on_vagr(vagr_depl, f, vm_db, callback=None, **kwargs):
         callback(vagr_depl, f, vm_db, **kwargs)
 
     status = vagr_depl.status()
-    vm_db.provider = status.provider
-    vm_db.state_set.add(State(name=status.state), bulk=False)
+    vm_db.provider = "docker-compose"
+    vm_db.state_set.add(State(name=status), bulk=False)
 
     try:
         vm_db.ip_addr = vagr_depl.service_network_address()
@@ -72,7 +72,7 @@ def run_on_vagr(vagr_depl, f, vm_db, callback=None, **kwargs):
 
 @delayed_task(ttl=settings.TASK_TTL)
 def status_of_deployment(vagr_depl):
-    return vagr_depl.status().state
+    return vagr_depl.status()
 
 
 @delayed_task(ttl=settings.TASK_TTL)
