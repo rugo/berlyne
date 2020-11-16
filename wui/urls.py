@@ -18,7 +18,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.index, name='wui_index'),
-    url(r'^pages/', include('django.contrib.flatpages.urls')),
+    url(r'^pages', include('django.contrib.flatpages.urls')),
     url(r'^accounts/', include(
         [
             url(r'^profile/$', views.profile, name='wui_acc_profile'),

@@ -28,7 +28,7 @@ class Course(models.Model):
     show_scoreboard = models.BooleanField(_('show scoreboard'), default=True)
 
     teacher = models.ForeignKey(auth_models.User,
-                                related_name='teacher_courses')
+                                related_name='teacher_courses', on_delete=models.CASCADE)
     participants = models.ManyToManyField(auth_models.User)
 
     # Pre shared key needed to join
@@ -98,7 +98,7 @@ class Submission(models.Model):
     creation_time = models.DateTimeField(auto_now_add=True)
     correct = models.BooleanField(_('correct'))
     writeup = models.TextField(_('write up'), null=True)
-    user = models.ForeignKey(auth_models.User)
+    user = models.ForeignKey(auth_models.User, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('flag', 'correct', 'user', 'problem')

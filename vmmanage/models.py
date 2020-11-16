@@ -312,7 +312,7 @@ class VirtualMachine(models.Model):
 
 class Download(models.Model):
     slug = models.SlugField()
-    problem = models.ForeignKey(Problem)
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     path = models.CharField(max_length=4096)
 
     @property
@@ -364,7 +364,7 @@ class Port(models.Model):
 class State(models.Model):
     name = models.CharField(_("name"), max_length=255)
     created = models.DateTimeField(auto_now_add=True)
-    vm = models.ForeignKey(VirtualMachine)
+    vm = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
 
     class Meta:
         get_latest_by = "created"
@@ -381,7 +381,7 @@ class Task(models.Model):
     given.
     """
     virtual_machine = models.ForeignKey(VirtualMachine, on_delete=models.CASCADE)
-    task = models.ForeignKey(task_models.TaskQueue)
+    task = models.ForeignKey(task_models.TaskQueue, on_delete=models.CASCADE)
     task_name = models.CharField(_("name"), max_length=255)
     creation_date = models.DateTimeField(auto_now_add=True)
 

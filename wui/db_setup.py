@@ -82,18 +82,18 @@ def __create_test_data():
     #    settings.VAGR_DEFAULT_VAGR_FILE
     # )
 
-    course = models.Course.objects.create(
-        name="Pwnable",
-        description="A test course",
-        show_scoreboard=True,
-        teacher=su,
-        point_threshold=300,
-        writeups=True,
-        start_time=timezone.now(),
-        deadline=timezone.now() + timezone.timedelta(weeks=1)
-    )
+    # course = models.Course.objects.create(
+    #     name="Pwnable",
+    #     description="A test course",
+    #     show_scoreboard=True,
+    #     teacher=su,
+    #     point_threshold=300,
+    #     writeups=True,
+    #     start_time=timezone.now(),
+    #     deadline=timezone.now() + timezone.timedelta(weeks=1)
+    # )
 
-    course.participants.add(u, su)
+    # course.participants.add(u, su)
 
 
     # models.CourseProblems.objects.create(

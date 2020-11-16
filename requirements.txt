@@ -1,5 +1,5 @@
-django==1.10
+django==2.2.17
 autotask
-python-vagrant
+psycopg2
 markdown
 git+https://gitlab.com/rugo/uptomate-re.git
