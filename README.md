@@ -5,6 +5,7 @@ So far it seems to work to install and automatically start the services.
 
 TODO:
 
+* Status doesnt seem to work. Problem is shown immediately in the course, even if container is not running yet.
 * Test if all WUI actions work
 * Maybe refactor to make code nicer
 * Remove `vagrant_libs` folder

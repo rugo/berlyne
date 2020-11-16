@@ -1,0 +1,30 @@
+version: '3.8'
+
+x-task-meta:
+  name: Zeh
+  points: 100
+  ports:
+    - "desc": service
+      "host": 65123
+      "guest": 1337
+  category: Reversing
+  tags:
+    - rev
+    - C
+    - macros
+  downloads:
+    "source": "quelltext/haupt.c"
+  flag: CSR{RUECKWARTSINGENEUREN}
+  desc: |
+    For the CSR we finally created a deutsche Programmiersprache!
+
+    Connect: `nc {HOST} {PORT_1337}`
+
+    [Download]({DL_source})
+
+
+services:
+  xinetd:
+    build: docker/
+    ports:
+      - "65123:1337"
