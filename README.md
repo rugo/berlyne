@@ -1,4 +1,15 @@
-# Berlyne
+# Docker-Compose branch
+This branch makes the switch from Vagrant to docker-compose using a modified uptomate.
+
+So far it seems to work to install and automatically start the services.
+
+TODO:
+
+* Test if all WUI actions work
+* Maybe refactor to make code nicer
+* Remove `vagrant_libs` folder
+
+# Berlyne 
 Berlyne is a trainings platform for applied IT security.
  
 The basic workflow is this:
