@@ -1,7 +1,7 @@
 # Docker-Compose branch
 This branch makes the switch from Vagrant to docker-compose using a modified uptomate.
 
-So far it seems to work to install and automatically start the services.
+So far it seems to work to install and automatically start/stop the services.
 
 TODO:
 
