@@ -64,6 +64,7 @@
     {% if user|has_perm:"can_manage_course" %}
         <a href="{% url 'wui_course_create' %}" class="btn btn-default">Create Course</a>
     {% endif %}
+
     <div class="panel panel-default">
       <!-- Default panel contents -->
       <div class="panel-heading">{{ headline_inactive }}</div>

@@ -70,7 +70,6 @@ def create_problem(problem_slug, vagrant_name):
             'install',
             vm,
             _install_deployment_callback,
-            vagrant_file_path=path.join(settings.VAGR_VAGRANT_PATH, vagrant_name)
         )
 
         vm.add_task(t, 'install')
