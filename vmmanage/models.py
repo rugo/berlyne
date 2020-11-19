@@ -439,5 +439,5 @@ class Task(models.Model):
 def vagr_factory(vm_slug):
     return Deployment.Vagrant(
         vm_slug,
-        deployment_path=settings.VAGR_DEPLOYMENT_PATH,
+        deployment_path=settings.PROBLEM_DEPLOYMENT_PATH,
     )

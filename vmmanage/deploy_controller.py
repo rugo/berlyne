@@ -100,7 +100,7 @@ def find_installable_problems():
     existing_slugs = models.Problem.objects.all().values_list('slug', flat=True)
     for task_path in glob(
             path.join(
-                settings.VAGR_DEPLOYMENT_PATH,
+                settings.PROBLEM_DEPLOYMENT_PATH,
                 "*",
                 Deployment.CONFIG_FILE_NAME
             )

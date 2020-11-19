@@ -84,9 +84,7 @@ def show_installable_problems(request):
         "vms/installable.html",
         {
             "problems": problems,
-            "vagrant_form": forms.VagrantFilesForm(
-                initial={'vagrant_file': settings.VAGR_DEFAULT_VAGR_FILE}
-            ),
+            "vagrant_form": forms.VagrantFilesForm(),
             "errors": msgs,
         }
     )

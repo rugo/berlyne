@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from datetime import datetime
 from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from os import path
 from wsgiref.util import FileWrapper
@@ -108,9 +109,14 @@ def course_edit(request, course_slug=None):
 # TODO: make in one query
 @login_required()
 def courses(request):
+    now = datetime.now()
+    active = models.Course.objects.filter(start_time__gt=now, deadline__lt=now)
+    active_names = active.values_list("name", flat=True)
     return render(request, 'courses/list.html', {
-        'headline': _('Courses'),
-        'courses': models.Course.objects.all(),
+        'headline': _('Courses Active Right Now'),
+        'headline_inactive': _('Inactive Courses'),
+        'courses': active,
+        'courses_inactive': models.Course.objects.exclude(name__in=active_names),
         'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
         'user_courses': request.user.course_set.all()
     })

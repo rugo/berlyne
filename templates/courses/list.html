@@ -53,6 +53,10 @@
                         </div>
                     </td>
                 </tr>
+              {% empty %}
+                  <tr>
+                    <td colspan="4">No Courses.</td>
+                  </tr>
               {% endfor %}
           </tbody>
       </table>
@@ -60,4 +64,59 @@
     {% if user|has_perm:"can_manage_course" %}
         <a href="{% url 'wui_course_create' %}" class="btn btn-default">Create Course</a>
     {% endif %}
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">{{ headline_inactive }}</div>
+
+      <!-- Table -->
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>{% trans "Name" %}</th>
+                  <th>{% trans "Participating" %}</th>
+                  <th>{% trans "Teacher" %}</th>
+                  <th>{% trans "Created" %}</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for c in courses_inactive %}
+                <tr>
+                    <td><a href="{% url "wui_course_show" c.name %}">{{ c.name }}</a></td>
+                    {% if c in user_courses %}
+                        <td>&#10003;</td>
+                    {% else %}
+                        <td>&#10060;</td>
+                    {% endif %}
+                    <td>{% if c.teacher.last_name %}{{ c.teacher.last_name }}{% else %}{{ c.teacher }}{% endif %}</td>
+                    <td>{{ c.creation_time|date:"d M Y" }}</td>
+                    <td>
+                        <div class="dropdown">
+                          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            Actions
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                              {% if user|has_perm:"can_manage_course" %}
+                                <li><a href="{% url 'wui_course_edit' c.name %}">Edit</a></li>
+                                <li><a href="{% url 'wui_course_manage_problems' c.name %}">Manage Problems</a></li>
+                                <li><a href="{% url 'wui_course_delete' c.name %}">Delete</a></li>
+                              {% endif %}
+                              {% if c in user_courses %}
+                                  <li><a href="{% url 'wui_course_leave' c.name %}">Leave</a></li>
+                              {% else %}
+                                  <li><a href="{% url 'wui_course_join' c.name %}">Join</a></li>
+                              {% endif %}
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+              {% empty %}
+                  <tr>
+                    <td colspan="4">No Courses.</td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </div>
 {% endblock %}

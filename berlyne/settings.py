@@ -180,9 +180,5 @@ TASK_TTL = 60 * 60 * 24
 
 # uptomate
 # Define where the problem folder is
-VAGR_DEPLOYMENT_PATH = os.path.join(BASE_DIR, 'problems')
-# Define where the vagrantfiles are
-VAGR_VAGRANT_PATH = os.path.join(BASE_DIR, 'vagrantfiles')
-# Define the default vagrant file name
-VAGR_DEFAULT_VAGR_FILE = 'ubuntu_docker'
+PROBLEM_DEPLOYMENT_PATH = os.path.join(BASE_DIR, 'problems')
 
