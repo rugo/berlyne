@@ -21,15 +21,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'd*z#c=i!lkw!xdxtx*3rak$(-44p@!a33@^1b$)5ntewh##b04'
+SECRET_KEY = open("/dev/urandom", "rb").read(32)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = "BERLYNE_PRODUCTION" not in os.environ
 
 DOMAIN = "localhost"
 
 ALLOWED_HOSTS = [DOMAIN]
 
+if not DEBUG:
+    ALLOWED_HOSTS.append(os.environ["BERLYNE_HOST"])
 
 LOGGING = {
     'version': 1,
