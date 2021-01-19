@@ -156,6 +156,7 @@ SITE_ID = 1
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(dir_t, 'static') for temp_list in TEMPLATES for dir_t in temp_list['DIRS']]
+STATIC_ROOT = '/var/www/static'
 
 # Berlyne specific config
 # If this is true, test data will be created
