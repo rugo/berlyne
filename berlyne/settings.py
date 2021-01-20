@@ -24,10 +24,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = "BERLYNE_PRODUCTION" not in os.environ
 
 # SECURITY WARNING: keep the secret key used in production secret!
-if DEBUG:
-    SECRET_KEY = b"31337"
-else:
-    SECRET_KEY = open("/dev/urandom", "rb").read(32)
+SECRET_FILE_NAME = ".secret"
+SECRET_FILE = os.path.join(BASE_DIR, SECRET_FILE_NAME)
+
+
+if not os.path.exists(SECRET_FILE):
+    open(SECRET_FILE, "wb").write(
+        open("/dev/urandom", "rb").read(32)
+    )
+
+SECRET_KEY = open(SECRET_FILE, "rb").read()
+
 
 DOMAIN = "localhost"
 
