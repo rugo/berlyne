@@ -36,12 +36,13 @@ if not os.path.exists(SECRET_FILE):
 SECRET_KEY = open(SECRET_FILE, "rb").read()
 
 
-DOMAIN = "localhost"
+if DEBUG:
+    DOMAIN = "localhost"
+else:
+    DOMAIN = os.environ["BERLYNE_HOST"]
+
 
 ALLOWED_HOSTS = [DOMAIN]
-
-if not DEBUG:
-    ALLOWED_HOSTS.append(os.environ["BERLYNE_HOST"])
 
 LOGGING = {
     'version': 1,
