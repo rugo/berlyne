@@ -92,7 +92,10 @@ class Problem(models.Model):
         since interaction with Vagrant is pretty slow.
         """
         if self.vm:
-            self.get_vagrant().destroy()
+            try:
+                self.get_vagrant().destroy()
+            except ValueError:
+                pass  # Problem was not phisically installed, just existed in DB
         self.delete()
 
     @property

@@ -115,8 +115,9 @@ def setup():
     try:
         __setup_create_groups()
         __setup_frontpage()
+        if settings.IN_TEST_MODE:
+            log("creating test data since IN_TEST_MODE is true")
+            __create_test_data()
     except IntegrityError:
         log("Could not initialize db! Is the db already initialized?")
-    if settings.IN_TEST_MODE:
-        log("creating test data since IN_TEST_MODE is true")
-        __create_test_data()
+
