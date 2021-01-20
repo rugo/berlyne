@@ -183,6 +183,7 @@ DEFAULT_USED_ACTION = "start"
 
 # autotask
 AUTOTASK_IS_ACTIVE = True  # "runserver" in sys.argv or "run_autotask" in sys.argv
+AUTOTASK_WORKER_EXECUTABLE = "python3"
 # Time the VMs tasks should be stored in the DB
 TASK_TTL = 60 * 60 * 24
 
