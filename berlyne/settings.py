@@ -43,11 +43,6 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': '/tmp/debug.log',
-        },
     },
     'loggers': {
         'django': {
