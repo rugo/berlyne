@@ -115,7 +115,8 @@ def install_problem(request):
         problem_name = request.POST['problem']
         try:
             deploy_controller.create_problem(problem_name, vagr_name)
-        except (OSError, IntegrityError):
+        except (OSError, IntegrityError) as ex:
+            print(ex)
             return redirect(reverse('vmmanage_show_installable') + '?m=exists')
         except ValueError as ex:
             return redirect(reverse('vmmanage_show_installable') + '?m=invalidconfig')

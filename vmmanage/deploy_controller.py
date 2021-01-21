@@ -54,9 +54,6 @@ def _install_deployment_callback(vagr_depl, f, vm_db, **kwargs):
 def create_problem(problem_slug, vagrant_name):
     vagr = vagr_factory(problem_slug)
 
-    if vagr.installed:
-        raise OSError("Problem with that name already exists in fs")
-
     # Set name as work around, so unique contraint is not violated
     # in case two VMs get created at the same time
     # This raises an IntegretyError if the problem slug already exists
