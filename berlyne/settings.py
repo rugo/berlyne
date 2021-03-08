@@ -43,6 +43,10 @@ else:
 
 
 ALLOWED_HOSTS = [DOMAIN]
+LOGFILE = "/tmp/django.log"
+
+if not DEBUG:
+    LOGFILE = "/opt/berlyne/log/django.log"
 
 LOGGING = {
     'version': 1,
@@ -51,10 +55,15 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': LOGFILE
+        }
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', "file"],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'WARN'),
         },
     },
