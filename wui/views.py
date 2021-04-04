@@ -110,7 +110,7 @@ def course_edit(request, course_slug=None):
 @login_required()
 def courses(request):
     now = datetime.now()
-    active = models.Course.objects.filter(start_time__gt=now, deadline__lt=now)
+    active = models.Course.objects.filter(start_time__lt=now, deadline__gt=now)
     active_names = active.values_list("name", flat=True)
     return render(request, 'courses/list.html', {
         'headline': _('Courses Active Right Now'),
