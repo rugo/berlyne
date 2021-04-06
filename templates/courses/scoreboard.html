@@ -19,11 +19,16 @@
                     </div>
                     <div class=".col-xs-4" style="float: left; width: 60%;">
                         <h3>
-                            {{ entry.username }}
+
                             {% if request.user|has_perm:"can_manage_course" %}
+                                <a href="{% url "wui_course_writeups" course.name %}?user={{ entry.username }}">
+                                    {{ entry.username }}
+                                </a>
                                 {% if entry.last_name %}
                                     ({{ entry.last_name }})
                                 {% endif %}
+                            {% else %}
+                                {{ entry.username }}
                             {% endif %}
                         </h3>
                     </div>
