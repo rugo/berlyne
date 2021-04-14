@@ -12,7 +12,12 @@
                         <h3>
                             {{ place }}
                             {% if place == 1 %}
-                                <img src="{% static 'img/frog.svg' %}" alt="{% trans 'crown' %}" width="10%" />
+                                {% now "D" as weekday %}
+                                {% if weekday == "Wed" %}
+                                    <img src="{% static 'img/frog.svg' %}" alt="{% trans 'Wednesday' %}" width="10%" />
+                                {% else %}
+                                    <img src="{% static 'img/crown.png' %}" alt="{% trans 'crown' %}" width="10%" />
+                                {% endif %}
                             {% endif %}
                         </h3>
 
