@@ -47,6 +47,13 @@ LOGFILE = "/tmp/django.log"
 
 if not DEBUG:
     LOGFILE = "/opt/berlyne/log/django.log"
+    EMAIL_HOST = "mail.redrocket.club"
+    EMAIL_HOST_USER = "system@redrocket.club"
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    try:
+        EMAIL_HOST_PASSWORD = open(".email_pw").read().strip()
+    except FileNotFoundError:
+        print("Email Pw not configured. Emails won't work!")
 
 LOGGING = {
     'version': 1,
