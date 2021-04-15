@@ -50,6 +50,7 @@ if not DEBUG:
     EMAIL_HOST = "mail.redrocket.club"
     EMAIL_HOST_USER = "system@redrocket.club"
     DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    EMAIL_USE_TLS = True
     try:
         EMAIL_HOST_PASSWORD = open(".email_pw").read().strip()
     except FileNotFoundError:
