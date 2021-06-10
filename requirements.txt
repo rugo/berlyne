@@ -1,4 +1,4 @@
-django==2.2.17
+django==2.2.24
 autotask
 psycopg2
 markdown
