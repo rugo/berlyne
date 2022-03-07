@@ -10,6 +10,10 @@ TODO:
 * Maybe refactor to make code nicer
 * Remove `vagrant_libs` folder
 
+Deploy new Problems:
+
+* Copy them into `problems` (probably in `/opt/berlyne/berlyne/problems`) folder, then add them via web interface.
+
 # Berlyne 
 Berlyne is a trainings platform for applied IT security.
  
