@@ -112,11 +112,19 @@ def courses(request):
     now = datetime.now()
     active = models.Course.objects.filter(start_time__lt=now, deadline__gt=now)
     active_names = active.values_list("name", flat=True)
+
+    if request.user.has_perm("can_manage_course"):
+        # Teachers can see all courses active or inactive
+        courses_inactive = models.Course.objects.exclude(name__in=active_names)
+    else:
+        # Participants can only see active courses and courses previously joined
+        courses_inactive = request.user.course_set.exclude(name__in=active_names)
+
     return render(request, 'courses/list.html', {
         'headline': _('Courses Active Right Now'),
         'headline_inactive': _('Inactive Courses'),
         'courses': active,
-        'courses_inactive': models.Course.objects.exclude(name__in=active_names),
+        'courses_inactive': courses_inactive,
         'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
         'user_courses': request.user.course_set.all()
     })
