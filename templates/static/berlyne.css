@@ -26,6 +26,10 @@ th {
   list-style: none;
 }
 
+.mr-bottom {
+    margin-bottom: 15px;
+}
+
 .col-centered {
     display:inline-block;
     float:none;

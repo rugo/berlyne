@@ -120,14 +120,18 @@ def courses(request):
         # Participants can only see active courses and courses previously joined
         courses_inactive = request.user.course_set.exclude(name__in=active_names)
 
-    return render(request, 'courses/list.html', {
-        'headline': _('Courses Active Right Now'),
-        'headline_inactive': _('Inactive Courses'),
-        'courses': active,
-        'courses_inactive': courses_inactive,
-        'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
-        'user_courses': request.user.course_set.all()
-    })
+    event_lists = {
+        "Events Active Right Now": active,
+        "Inactive Events": courses_inactive
+    }
+
+    return render(request, 'courses/list.html',
+                  {
+                      'event_lists': event_lists,
+                      'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
+                      'user_courses': request.user.course_set.all()
+                  }
+    )
 
 
 @login_required()
@@ -217,7 +221,7 @@ def _course_problem_dict(course, user):
             'slug': course_prob.problem.slug,
             'points': course_prob.points,
             'desc': markdown.markdown(course_prob.problem.parse_desc() or
-                        MESSAGES['problem_not_ready']),
+                                      MESSAGES['problem_not_ready']),
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
             ),
@@ -256,7 +260,7 @@ def course_problems(request, course_slug):
         else:
             form = SubmissionForm(request.POST)
             if form.is_valid():
-                flag_correct, course_problem =\
+                flag_correct, course_problem = \
                     models.CourseProblems.check_problem_flag(
                         course,
                         form.cleaned_data['problem_slug'],
@@ -293,10 +297,10 @@ def course_problems(request, course_slug):
     user_points = sum(
         [
             sub.problem.points for sub in models.Submission.objects.filter(
-                user=request.user,
-                correct=True,
-                problem__course=course
-            )
+            user=request.user,
+            correct=True,
+            problem__course=course
+        )
         ]
     )
 
@@ -568,7 +572,7 @@ def download_file(request, download_id):
     if download.problem.course_set.filter(
             participants__pk=request.user.pk
     ).exists():
-            return _download_wrapped_file(download)
+        return _download_wrapped_file(download)
 
     return HttpResponse(
         "Not Found", status=HTTP_NOT_FOUND

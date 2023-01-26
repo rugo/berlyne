@@ -5,7 +5,7 @@
 {% block content %}
     <ul class="nav nav-tabs">
         <li role="presentation" {% if page == "course" %} class="active"{% endif %}>
-            <a href="{% url "wui_course_show" course.name %}">{% trans "Course" %}</a>
+            <a href="{% url "wui_course_show" course.name %}">{% trans "Event" %}</a>
         </li>
         <li role="presentation" {% if page == "problems" %} class="active"{% endif %}>
             <a href="{% url "wui_course_problems" course.name %}">{% trans "Problems" %}</a>
