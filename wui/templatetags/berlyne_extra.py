@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from django import template
+from markdown import markdown
+
 register = template.Library()
 
 # Uses code from:
@@ -31,3 +33,9 @@ def has_perm(user, perm_name):
 @register.filter(name='is_in_group')
 def user_is_in_group(user, group_name):
     return user.groups.filter(name=group_name).exists()
+
+
+@register.filter()
+def markdownify(text):
+    return markdown(text)
+
