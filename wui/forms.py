@@ -50,6 +50,9 @@ class CourseForm(ModelForm):
             'password',
             'point_threshold',
         ]
+        labels = {
+            'point_threshold': "Points required (may be 0)"
+        }
 
 
 class CoursePwForm(Form):

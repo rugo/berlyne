@@ -3,7 +3,9 @@
 {% block details %}
     <h1>{{ course.name }}</h1>
     <div class="content-left">
+        {%  if course.point_threshold > 0 %}
         <strong>{% trans "Points needed to pass" %}:</strong> {{ course.point_threshold }}
+        {%  endif %}
         <br />
         <strong>{% trans "Begin" %}:</strong> {{ course.start_time|date:"d M y" }}, {{ course.start_time|time:"H:i" }}
         <br />
