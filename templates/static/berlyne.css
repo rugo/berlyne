@@ -38,3 +38,12 @@ th {
     /* inline-block space fix */
     margin-right:-4px;
 }
+
+.navbar-inline-img {
+    display: inline !important;
+    filter: invert(1);
+}
+
+.navbar-brand-bright {
+    color: white !important;
+}
