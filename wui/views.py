@@ -50,6 +50,7 @@ from .forms import (
     WriteupForm,
     UserEmailCreateForm,
 )
+from django.db.models.functions import Lower
 
 DOWNLOAD_FNAME_TEMLATE = "{problem_slug}_{download_pk}_{filename}"
 MESSAGES = {
@@ -110,15 +111,15 @@ def course_edit(request, course_slug=None):
 @login_required()
 def courses(request):
     now = datetime.now()
-    active = models.Course.objects.filter(start_time__lt=now, deadline__gt=now)
+    active = models.Course.objects.filter(start_time__lt=now, deadline__gt=now).order_by(Lower('name'))
     active_names = active.values_list("name", flat=True)
 
     if request.user.has_perm("can_manage_course"):
         # Teachers can see all courses active or inactive
-        courses_inactive = models.Course.objects.exclude(name__in=active_names)
+        courses_inactive = models.Course.objects.exclude(name__in=active_names).order_by(Lower("name"))
     else:
         # Participants can only see active courses and courses previously joined
-        courses_inactive = request.user.course_set.exclude(name__in=active_names)
+        courses_inactive = request.user.course_set.exclude(name__in=active_names).order_by("start_time")
 
     event_lists = {
         "Events Active Right Now": active,
