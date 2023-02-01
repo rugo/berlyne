@@ -18,6 +18,7 @@ from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from os import path
 from wsgiref.util import FileWrapper
 import markdown
+from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import IntegrityError
@@ -59,7 +60,8 @@ MESSAGES = {
     'deleted': _("You deleted the course"),
     'left': _("You left the course"),
     'join_first': _("Join the course first"),
-    'problem_not_ready': _("The problem has not been initialized yet")
+    'problem_not_ready': _("The problem has not been initialized yet"),
+    'prev_level_not_solved': _("*Task available once you finish previous level.*")
 }
 
 
@@ -210,19 +212,35 @@ def course_leave(request, course_slug):
     return redirect(reverse('wui_courses') + "?m=left")
 
 
-def _course_problem_dict(course, user):
+def _course_problem_dict_story(course, user):
     categories = {}
     total_points = 0
-    for course_prob in models.CourseProblems.objects.filter(course=course):
-        category = course_prob.problem.category.capitalize()
+    levels_completed = defaultdict(lambda: True)
+    for course_prob in models.CourseProblems.objects.filter(course=course).order_by('problem__category'):
+        category = course_prob.problem.category.upper()
+        level = 0
+        if "LEVEL " in category:
+            try:
+                story, level = category.split("/LEVEL ")
+                level = int(level)
+                solved = course_prob.submission_set.filter(
+                    user=user,
+                    correct=True,
+                )
+                if not solved.exists():
+                    # There is at least one unsolved challenge in this level
+                    levels_completed[level] = False
+            except ValueError as ex:
+                pass  # Could not parse level. Proceed as if it was normal task
+
         problems = categories.get(category, [])
 
         problems.append({
             'title': course_prob.problem.name,
             'slug': course_prob.problem.slug,
             'points': course_prob.points,
-            'desc': markdown.markdown(course_prob.problem.parse_desc() or
-                                      MESSAGES['problem_not_ready']),
+            'desc': markdown.markdown(course_prob.problem.parse_desc() if levels_completed[level - 1] else
+                                      MESSAGES['prev_level_not_solved']),
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
             ),
@@ -294,7 +312,7 @@ def course_problems(request, course_slug):
             else:
                 errors.append(_("Form was invalid"))
 
-    categories, total_points = _course_problem_dict(course, request.user)
+    categories, total_points = _course_problem_dict_story(course, request.user)
     user_points = sum(
         [
             sub.problem.points for sub in models.Submission.objects.filter(
