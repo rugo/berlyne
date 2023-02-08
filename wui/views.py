@@ -235,11 +235,13 @@ def _course_problem_dict_story(course, user):
 
         problems = categories.get(category, [])
 
+        prob_desc = course_prob.problem.parse_desc() or MESSAGES['problem_not_ready']
+
         problems.append({
             'title': course_prob.problem.name,
             'slug': course_prob.problem.slug,
             'points': course_prob.points,
-            'desc': markdown.markdown(course_prob.problem.parse_desc() if levels_completed[level - 1] else
+            'desc': markdown.markdown(prob_desc if levels_completed[level - 1] else
                                       MESSAGES['prev_level_not_solved']),
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
