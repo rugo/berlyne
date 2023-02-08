@@ -180,6 +180,9 @@ class Problem(models.Model):
         vm = self.vm
         if vm:
             if not vm.provider or vm.ip_addr == UNKNOWN_HOST:
+                logger.warning(
+                    "No vm provider or external IP set in task description for problem %s", self.name
+                )
                 return None
 
             if vm.ip_addr == LOCALHOST:

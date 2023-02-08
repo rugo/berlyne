@@ -43,6 +43,12 @@ else:
 
 
 ALLOWED_HOSTS = [DOMAIN]
+
+ALT_DOMAIN = os.environ.get("BERLYNE_HOST_ALT")
+
+if ALT_DOMAIN:
+    ALLOWED_HOSTS.append(ALT_DOMAIN)
+
 LOGFILE = "/tmp/django.log"
 
 if not DEBUG:
