@@ -194,6 +194,21 @@ SITE_ID = 1
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(dir_t, 'static') for temp_list in TEMPLATES for dir_t in temp_list['DIRS']]
 STATIC_ROOT = '/var/www/static'
+SOUND_FILES = []
+
+# TODO: Add a view/endpoint instead, that returns a random sound as mp3 and ogg
+for static_dir in STATICFILES_DIRS:
+    _sound_base_dir = os.path.join(static_dir, "sound")
+    _sound_dir_mp3 = os.path.join(_sound_base_dir, "mp3")
+    _sound_dir_ogg = os.path.join(_sound_base_dir, "ogg")
+
+    if os.path.isdir(_sound_dir_mp3):
+        _sounds = os.listdir(_sound_dir_mp3)
+        for sound in _sounds:
+            if sound.endswith(".mp3"):
+                sound_name = os.path.splitext(sound)[0]
+                if os.path.isfile(os.path.join(_sound_dir_ogg, sound_name) + ".ogg"):
+                    SOUND_FILES.append(sound_name)
 
 # Berlyne specific config
 # If this is true, test data will be created

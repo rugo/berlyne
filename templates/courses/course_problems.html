@@ -1,6 +1,13 @@
 {% extends "courses/detail_base.html" %}
 {% load i18n %}
+{% load static %}
 {% block details %}
+    {% if solve_sound %}
+        <audio autoplay>
+            <source src="{% static "/sound/mp3/" %}{{ solve_sound }}.mp3" type="audio/mpeg">
+            <source src="{% static "/sound/ogg/" %}{{ solve_sound }}.ogg" type="audio/ogg">
+        </audio>
+    {% endif %}
     <h1>{% trans 'Problems' %}</h1>
     <h4>{% trans 'Your points' %}: {{ user_points }} of {{ total_points }}</h4>
     {% include 'courses/problem_list.html' %}

@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import random
 from datetime import datetime
 from http.client import NOT_FOUND as HTTP_NOT_FOUND
 from os import path
@@ -37,6 +38,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from vmmanage import views as vm_views
 from vmmanage.models import Download
@@ -272,6 +274,7 @@ def course_problems(request, course_slug):
     open_slug = request.GET.get('slug', '')
     errors = []
     success = []
+    solve_sound = None
     if not course.has_user(request.user):
         return redirect(reverse('wui_courses') + "?m=join_first")
 
@@ -309,6 +312,7 @@ def course_problems(request, course_slug):
 
                 if flag_correct:
                     success.append(_("Flag was correct!"))
+                    solve_sound = random.choice(settings.SOUND_FILES)
                 else:
                     errors.append(_("Flag was incorrect!"))
             else:
@@ -336,7 +340,8 @@ def course_problems(request, course_slug):
             'course': course,
             'open_slug': open_slug,
             'errors': errors,
-            'success': success
+            'success': success,
+            'solve_sound': solve_sound
         }
     )
 
