@@ -1,0 +1,5 @@
+# Don't push sounds to repo due to copyright
+*.mp3
+*.ogg
+!mp3/csi_miami.wav.mp3
+!ogg/csi_miami.wav.ogg
