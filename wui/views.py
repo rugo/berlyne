@@ -136,7 +136,7 @@ def courses(request):
                       'message': MESSAGES.get(request.GET.get('m', ''), 'Invalid message'),
                       'user_courses': request.user.course_set.all()
                   }
-    )
+                  )
 
 
 @login_required()
@@ -218,9 +218,14 @@ def _course_problem_dict_story(course, user):
     categories = {}
     total_points = 0
     levels_completed = defaultdict(lambda: True)
+
     for course_prob in models.CourseProblems.objects.filter(course=course).order_by('problem__category'):
         category = course_prob.problem.category.upper()
         level = 0
+
+        # TODO: This whole level implementation is a quick-and-dirty approach to see how good leveled
+        # challenges work. If they work out, the level and description logic should be moved into the
+        # Problem model.
         if "LEVEL " in category:
             try:
                 story, level = category.split("/LEVEL ")
@@ -239,12 +244,14 @@ def _course_problem_dict_story(course, user):
 
         prob_desc = course_prob.problem.parse_desc() or MESSAGES['problem_not_ready']
 
+        if not user.has_perm('can_manage_course') and not levels_completed[level - 1]:
+            prob_desc = MESSAGES['prev_level_not_solved']
+
         problems.append({
             'title': course_prob.problem.name,
             'slug': course_prob.problem.slug,
             'points': course_prob.points,
-            'desc': markdown.markdown(prob_desc if levels_completed[level - 1] else
-                                      MESSAGES['prev_level_not_solved']),
+            'desc': markdown.markdown(prob_desc),
             'form': SubmissionForm(initial={
                 'problem_slug': course_prob.problem.slug}
             ),
