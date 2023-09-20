@@ -329,10 +329,10 @@ def course_problems(request, course_slug):
     user_points = sum(
         [
             sub.problem.points for sub in models.Submission.objects.filter(
-            user=request.user,
-            correct=True,
-            problem__course=course
-        )
+                user=request.user,
+                correct=True,
+                problem__course=course
+            )
         ]
     )
 
