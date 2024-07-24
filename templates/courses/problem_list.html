@@ -4,7 +4,7 @@
     <div class="content-left">
         <h3>{{ category }}</h3>
     </div>
-    {% for problem in problems %}
+    {% for problem in problems|dictsort:"points" %}
          <div class="panel-group">
           <div class="panel panel-default">
             <div class="panel-heading">
