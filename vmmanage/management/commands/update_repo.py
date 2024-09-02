@@ -29,10 +29,6 @@ class Command(BaseCommand):
 
             print(f"Processing {problem.name}/{problem.slug} from {problem.path}")
 
-            if problem.version_hash == problem.calc_version_hash():
-                print(f"Problem {problem.name}/{problem.slug} has not changed.")
-                continue
-
             if not os.path.isdir(problem.relative_path):
                 print(
                     self.style.ERROR(
@@ -44,6 +40,10 @@ class Command(BaseCommand):
                 if options["delete"]:
                     print(f"Deleting problem {problem.name}/{problem.slug}, as it is not in the fs anymore.")
                     problem.delete()
+                continue
+
+            if problem.version_hash == problem.calc_version_hash():
+                print(f"Problem {problem.name}/{problem.slug} has not changed.")
                 continue
 
             print(f"Processing {problem.name}/{problem.slug} from {problem.path} has changed! Updating...")
