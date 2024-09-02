@@ -31,11 +31,7 @@ class Command(BaseCommand):
 
             if not os.path.isdir(problem.relative_path):
                 print(
-                    self.style.ERROR(
-                        f"Problem path {problem.path} (Problem {problem.name}/{Problem.slug}) doesn't exist."
-                        "Skipping."
-                    ),
-                    file=sys.stderr
+                    f"Problem path {problem.path} (Problem {problem.name}) doesn't exist. Skipping."
                 )
                 if options["delete"]:
                     print(f"Deleting problem {problem.name}/{problem.slug}, as it is not in the fs anymore.")
