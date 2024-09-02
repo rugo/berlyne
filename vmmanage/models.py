@@ -29,6 +29,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .uptomate import Deployment
 from .uptomate.Provider import LOCALHOST, ALLOWED_PROVIDERS
+from checksumdir import dirhash
 
 LEGAL_API_VM_ACTIONS = [
     'start',
@@ -62,6 +63,7 @@ class Problem(models.Model):
     path = models.CharField(max_length=255, blank=True)
     name = models.CharField(_("name"), max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    version_hash = models.CharField(max_length=32, blank=True)
 
     # Attrs used from config
     desc = models.TextField(_("description"), max_length=1024)
@@ -82,12 +84,26 @@ class Problem(models.Model):
 
         slug_id = secrets.token_urlsafe(settings.PROBLEM_ID_LENGTH)
         problem = cls(slug=slug_id, name=slug_id, path=path)
+        problem.set_version_hash()
         problem.set_basic_config(config)
         problem.save()
         problem.assign_tags(config['tags'])
         problem.assign_downloads(config.get('downloads', {}))
         problem.assign_vm(config.get('ports', []))
         return problem
+
+    def update(self):
+        vagr = vagr_factory(self.path)
+        config = vagr.get_config()
+        self.set_version_hash()
+        self.set_basic_config(config)
+        self.save()
+        self.delete_tags()
+        self.assign_tags(config['tags'])
+        self.delete_downloads()
+        self.assign_downloads(config.get('downloads', {}))
+        if self.virtualmachine_set.exists():
+            self.rebuild_vm(config.get('ports', []))
 
     def destroy(self):
         """
@@ -129,6 +145,15 @@ class Problem(models.Model):
             raise ValueError("A download only challenge MUST "
                              "contain a flag in it's meta data!")
 
+    def rebuild_vm(self, ports):
+        self.get_vagrant().destroy()
+        self.get_vagrant().install()
+
+        if ports:
+            for vm in self.virtualmachine_set.all():
+                vm.port_set.all().delete()
+                vm.assign_ports(ports)
+
     def assign_vm(self, ports):
         # In case ports are defined, we need a VM
         if ports:
@@ -136,9 +161,15 @@ class Problem(models.Model):
             vm.assign_ports(ports)
             self.virtualmachine_set.add(vm)
 
+    def delete_tags(self):
+        self.tag_set.all().delete()
+
     def assign_tags(self, tags):
         for t in tags:
             self.tag_set.add(Tag.objects.update_or_create(name=t)[0])
+
+    def delete_downloads(self):
+        self.download_set.all().delete()
 
     def assign_downloads(self, downloads):
         for slug, d in downloads.items():
@@ -239,6 +270,17 @@ class Problem(models.Model):
             self.name, self.default_points, self.category,
             ",".join([str(t) for t in self.tag_set.all()])
         )
+
+    def calc_version_hash(self):
+        base_path = self.relative_path
+        if not os.path.isdir(base_path):
+            raise ValueError(f"Problem path does not exist: {base_path}")
+
+        return dirhash(base_path)
+
+
+    def set_version_hash(self):
+        self.version_hash = self.calc_version_hash()
 
 
 class VirtualMachine(models.Model):

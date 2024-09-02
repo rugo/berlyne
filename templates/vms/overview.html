@@ -11,7 +11,7 @@
               <tr>
                   <th>{% trans 'Name' %}</th>
                   <th>{% trans 'Path' %}</th>
-                  <th>{% trans 'ID' %}</th>
+                  <th>{% trans 'Version' %}</th>
                   <th>{% trans 'Type' %}</th>
                   <th>{% trans 'State' %}</th>
                   <th>{% trans 'Last Task' %}</th>
@@ -22,7 +22,7 @@
                       <tr>
                           <td><a href="{% url "vmmanage_detail_problem" problem.slug %}">{{ problem.name }}</a></td>
                           <td>{{ problem.path }}</td>
-                          <td>{{ problem.slug }}</td>
+                          <td>{{ problem.version_hash|slice:":8" }}</td>
                           {% if problem.vm %}
                             <td>{{ problem.vm.provider.capitalize }} {% trans "VM" %}</td>
                             <td class="{{ problem.vm.state_set.latest.name|state_css_class }}">

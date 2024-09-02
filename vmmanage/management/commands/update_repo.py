@@ -18,10 +18,21 @@ class Command(BaseCommand):
             help="Automatically install new problems from the repo.",
         )
 
+        parser.add_argument(
+            "--delete",
+            action="store_true",
+            help="Automatically delete problems that don't exist in the fs anymore.",
+        )
+
     def handle(self, *args, **options):
         for problem in Problem.objects.all():
 
             print(f"Processing {problem.name}/{problem.slug} from {problem.path}")
+
+            if problem.version_hash == problem.calc_version_hash():
+                print(f"Problem {problem.name}/{problem.slug} has not changed.")
+                continue
+
             if not os.path.isdir(problem.relative_path):
                 print(
                     self.style.ERROR(
@@ -30,15 +41,13 @@ class Command(BaseCommand):
                     ),
                     file=sys.stderr
                 )
+                if options["delete"]:
+                    print(f"Deleting problem {problem.name}/{problem.slug}, as it is not in the fs anymore.")
+                    problem.delete()
                 continue
 
-            vagr = vagr_factory(problem.path)
-
-            config = vagr.get_config()
-
-            problem.set_basic_config(config)
-
-            problem.save()
+            print(f"Processing {problem.name}/{problem.slug} from {problem.path} has changed! Updating...")
+            problem.update()
 
         if options["install"]:
             for success, path, error in install_available_problems():
