@@ -16,7 +16,6 @@
                 <li class="list-group-item"><strong>{% trans 'Directory' %}</strong>: {{ problem.path }}</li>
                 <li class="list-group-item"><strong>{% trans 'Description' %}</strong>:<br /> {{ problem.desc }}</li>
                 {% if problem.vm %}
-                <li class="list-group-item"><strong>{% trans 'IP-Address' %}</strong>: {{ problem.vm.ip_addr }}</li>
                 <li class="list-group-item"><strong>{% trans 'Provider' %}</strong>: {{ problem.vm.provider }}</li>
                 <li class="list-group-item"><strong>{% trans 'Ports' %}</strong>:
                     {% for port in problem.vm.port_set.all %}{{ port }}{% endfor %}
