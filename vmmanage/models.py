@@ -38,7 +38,8 @@ LEGAL_API_VM_ACTIONS = [
     # 'address',
     # 'resume',
     # 'suspend',
-    'reload'
+    'reload',
+    'rebuild'
 ]
 
 MIN_PORT = 1025
@@ -102,8 +103,13 @@ class Problem(models.Model):
         self.assign_tags(config['tags'])
         self.delete_downloads()
         self.assign_downloads(config.get('downloads', {}))
-        if self.virtualmachine_set.exists():
-            self.rebuild_vm(config.get('ports', []))
+
+        ports = config.get('ports')
+        if ports:
+            self.vm.port_set.all().delete()
+            self.vm.assign_ports(ports)
+
+        self.get_vagrant().rebuild()
 
     def destroy(self):
         """
@@ -144,15 +150,6 @@ class Problem(models.Model):
         if not flag and not ports:
             raise ValueError("A download only challenge MUST "
                              "contain a flag in it's meta data!")
-
-    def rebuild_vm(self, ports):
-        self.get_vagrant().destroy()
-        self.get_vagrant().install()
-
-        if ports:
-            for vm in self.virtualmachine_set.all():
-                vm.port_set.all().delete()
-                vm.assign_ports(ports)
 
     def assign_vm(self, ports):
         # In case ports are defined, we need a VM

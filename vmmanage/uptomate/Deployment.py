@@ -200,6 +200,16 @@ class Vagrant:
         self.start()
 
     @check_installed
+    def rebuild(self):
+        prev_status = self.status()
+
+        self.destroy()
+        self.install()
+
+        if prev_status == VAGRANT_RUNNING:
+            self.start()
+
+    @check_installed
     def suspend(self):
         self.call_dc("pause")
 

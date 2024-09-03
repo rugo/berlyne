@@ -1,9 +1,9 @@
 import os
-import sys
+from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
 
-from vmmanage.deploy_controller import install_available_problems
+from vmmanage.deploy_controller import install_available_problems, run_on_existing
 from vmmanage.models import Problem, vagr_factory
 
 
@@ -27,8 +27,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for problem in Problem.objects.all():
 
-            print(f"Processing {problem.name}/{problem.slug} from {problem.path}")
-
             if not os.path.isdir(problem.relative_path):
                 print(
                     f"Problem path {problem.path} (Problem {problem.name}) doesn't exist. Skipping."
@@ -39,7 +37,6 @@ class Command(BaseCommand):
                 continue
 
             if problem.version_hash == problem.calc_version_hash():
-                print(f"Problem {problem.name}/{problem.slug} has not changed.")
                 continue
 
             print(f"Processing {problem.name}/{problem.slug} from {problem.path} has changed! Updating...")
