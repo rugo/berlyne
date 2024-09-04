@@ -93,7 +93,7 @@ class Problem(models.Model):
         problem.assign_vm(config.get('ports', []))
         return problem
 
-    def update(self):
+    def update_meta(self):
         vagr = vagr_factory(self.path)
         config = vagr.get_config()
         self.set_version_hash()
@@ -108,8 +108,6 @@ class Problem(models.Model):
         if ports:
             self.vm.port_set.all().delete()
             self.vm.assign_ports(ports)
-
-        self.get_vagrant().rebuild()
 
     def destroy(self):
         """

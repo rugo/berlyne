@@ -2,9 +2,9 @@ import os
 from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
-
+from django.conf import settings
 from vmmanage.deploy_controller import install_available_problems, run_on_existing
-from vmmanage.models import Problem, vagr_factory
+from vmmanage.models import Problem
 
 
 class Command(BaseCommand):
@@ -40,7 +40,14 @@ class Command(BaseCommand):
                 continue
 
             print(f"Processing {problem.name}/{problem.slug} from {problem.path} has changed! Updating...")
-            problem.update()
+            problem.update_meta()
+            # The actual rebuild is launched asynchronously.
+            # However, asynchronous jobs with autotask only work on
+            # the production DB. So for the local test setup we work synchronously
+            if settings.DEBUG:
+                problem.get_vagrant().rebuild()
+            else:
+                run_on_existing("rebuild", problem.vm)
 
         if options["install"]:
             for success, path, error in install_available_problems():
